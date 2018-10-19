@@ -1,0 +1,15 @@
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.dll.config
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.pdb
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\Castle.Core.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\NSubstitute.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\nunit.framework.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\RobotArm.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\Shouldly.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\System.Threading.Tasks.Extensions.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\RobotArm.pdb
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\nunit.framework.xml
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\bin\Debug\System.Threading.Tasks.Extensions.xml
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.csprojResolveAssemblyReference.cache
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.dll
+C:\Users\tupac\documents\visual studio 2015\Projects\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.pdb
