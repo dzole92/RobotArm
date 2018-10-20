@@ -7,6 +7,8 @@
     var mouseVector;
     var CANVAS_WIDTH;
     var CANVAS_HEIGHT;
+    var latestRobotArmComponents = [];
+    var highlightedPoint;
 
     function initializeScene() {
         var scene3d = document.getElementById("robotArmGraphic");
@@ -142,15 +144,24 @@
         scene.add(meshY);
     }
 
-    function drawPoint(x, y, z, isRobotArm) {
+    function drawPoint(x, y, z, options) {
+        options = options !== undefined ? options : {};
         const ballGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-        const ballMaterial = new THREE.MeshPhongMaterial({ color: isRobotArm ? 0xFF0000 : 0x33aaff });
+        const ballMaterial = new THREE.MeshPhongMaterial({ color: options.type !== undefined && (options.type === "robotArmComponent" || options.type === "highlightPosition") ? 0xFF0000 : 0x33aaff });
         const ball = new THREE.Mesh(ballGeometry, ballMaterial);
         scene.add(ball);
         ball.position.z = z;
         ball.position.x = x;
         ball.position.y = y;
         points.push(ball);
+        if (options.type !== undefined && options.type === "robotArmComponent") {
+            ball.name = "robotArmComponent";
+            latestRobotArmComponents.push(ball);
+        }
+        else if (options.type !== undefined && options.type === "highlightPosition") {
+            ball.name = "highlightPosition";
+            highlightedPoint = ball;
+        }
     }
 
     function drawRobotArm(jointPoint, endPoint) {
@@ -159,10 +170,12 @@
         robotArm.vertices.push(new THREE.Vector3( 0, 0, 0) );
         robotArm.vertices.push(new THREE.Vector3( jointPoint.x, jointPoint.y, jointPoint.z) );
         robotArm.vertices.push(new THREE.Vector3( endPoint.x, endPoint.y, endPoint.z) );  
-        const line = new THREE.Line( robotArm, material );
+        const line = new THREE.Line(robotArm, material);
+        line.name = `robotArmComponent`;
         scene.add(line);
-        drawPoint(jointPoint.x, jointPoint.y, jointPoint.z, true);
-        drawPoint(endPoint.x, endPoint.y, endPoint.z, true);
+        latestRobotArmComponents.push(line);
+        drawPoint(jointPoint.x, jointPoint.y, jointPoint.z, {type: "robotArmComponent"});
+        drawPoint(endPoint.x, endPoint.y, endPoint.z, { type: "robotArmComponent" });
     }
 
     function randomColor() {
@@ -241,6 +254,25 @@
         renderScene();
     }
 
+    function clearLatestRobotArmComponents() {
+        if (latestRobotArmComponents.length === 0) return;
+        latestRobotArmComponents.map(object => {
+            const selectedObject = scene.getObjectByName(object.name);
+            scene.remove(selectedObject);
+        });
+        latestRobotArmComponents = [];
+        renderScene();
+    }
+
+    function highlightPosition(x, y, z) {
+        if (highlightedPoint !== undefined) {
+            const selectedObject = scene.getObjectByName(highlightedPoint.name);
+            scene.remove(selectedObject);
+        }
+        drawPoint(x, y, z, { type: "highlightPosition" });
+        renderScene();
+    }
+
     
     window.RobotArm = {
         InitializeScene: initializeScene,
@@ -248,6 +280,8 @@
         RenderScene: renderScene,
         ChangeCameraPosition: changeCameraPosition,
         ClearScene: clearScene,
-        DrawRobotArm: drawRobotArm
+        DrawRobotArm: drawRobotArm,
+        ClearLatestRobotArmComponents: clearLatestRobotArmComponents,
+        HighlightPosition: highlightPosition
     }
 }(document, window, jQuery, window.RobotArm));

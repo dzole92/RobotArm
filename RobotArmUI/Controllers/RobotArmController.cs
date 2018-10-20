@@ -54,9 +54,20 @@ namespace RobotArmUI.Controllers
         /// <returns></returns>
         public async Task<JsonResult> CalculateJointPostions(double x, double y)
         {
-            if(_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
-            var result = await _robotArm.CalculateArmJoint(new Point() {X = x, Y = y, Z = 0});
-            return Json(new {Success = result.Any(), Positions = result.ToList()});
+            try
+            {
+                if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+                var result = await _robotArm.CalculateArmJoint(new Point() { X = x, Y = y, Z = 0 });
+                if( result.Any(point=> double.IsNaN(point.X) || double.IsNaN(point.Y))) throw new Exception("Some of the coordinates is NaN.");
+                return Json(new { Success = result.Any(), Positions = result.ToList() });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Json(new { Success = false, e.Message});
+
+            }
+
         }
 
     }

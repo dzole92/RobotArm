@@ -91,9 +91,11 @@ namespace TestRobotArm
 
         }
 
-        [Test]
-        [TestCase(5.3524493404594757, 4.0198682584939531, 0)]
-        public async Task CalculateJointPostionWhenPointPostionKnown(double x, double y, double z)
+        [TestCase(5.3524493404594757, 4.0198682584939531, 0, 2)]
+        [TestCase(-3.7377074746323506, 2.3615021832391703, 0, 1)]
+        [TestCase(6.965029156946181, 0.698833916527797, 0, 1)]
+        [TestCase(-0.5775140827585494, 6.433306965204406, 0, 1)]
+        public async Task CalculateJointPostionWhenPointPostionKnown(double x, double y, double z, int expectingPositions)
         {
             var robotArm = new RobotArm1(3, 4, 0, 1.5, 0, 3.1);
             var agleStep = 0.1;
@@ -104,17 +106,18 @@ namespace TestRobotArm
 
             var res = await robotArm.CalculateArmJoint(endPoint);
 
-
             res.ShouldNotBeNull();
-            res.Count().ShouldBe(2);
+            res.Count().ShouldBe(expectingPositions);
             var points = res.ToArray();
             points[0].X.ShouldBeGreaterThan(0);
             points[0].Y.ShouldBeGreaterThan(0);
             points[0].Z.ShouldBe(0);
-            points[0].DistanceFromOtherPoint(zeroPoint).ShouldBe(robotArm.L1);
-            points[0].DistanceFromOtherPoint(endPoint).ShouldBe(robotArm.L2);
-            points[1].DistanceFromOtherPoint(zeroPoint).ShouldBe(robotArm.L1);
-            points[1].DistanceFromOtherPoint(endPoint).ShouldBe(robotArm.L2);
+            (Math.Abs(points[0].DistanceFromOtherPoint(zeroPoint)- robotArm.L1)< 0.0000001).ShouldBe(true);
+            (Math.Abs(points[0].DistanceFromOtherPoint(endPoint)- robotArm.L2)< 0.0000001).ShouldBe(true);
+            if (expectingPositions == 2) {
+                (Math.Abs(points[1].DistanceFromOtherPoint(zeroPoint) - robotArm.L1) < 0.0000001).ShouldBe(true);
+                (Math.Abs(points[1].DistanceFromOtherPoint(endPoint) - robotArm.L2) < 0.0000001).ShouldBe(true);
+            }
         }
     }
 }

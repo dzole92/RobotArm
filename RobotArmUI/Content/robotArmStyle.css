@@ -8,14 +8,20 @@
     /*display: inline-block;*/
 }
 .optionsBar {
-    width: 100%;
     /*height: 100px;*/
-    display: block;
-    padding-bottom: 10px;
+    display: inline-block;
+    padding-bottom: 20px;
+
 }
 .inputBarDiv {
     display: inline-block;
     /*width: 500px;*/
+}
+.inputBarDiv input {
+    width: 70px;
+}
+.inputBarDiv2 input {
+    width: 70px;
 }
 .inputBarDiv1 {
     display: inline-block;
@@ -101,4 +107,9 @@ i {
     left: 8px;
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
+}
+
+.positionsDiv {
+    display: inline-block;
+    padding-left: 50px;
 }

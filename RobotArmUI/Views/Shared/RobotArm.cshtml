@@ -7,22 +7,22 @@
 <h2>RobotArm</h2>
 <div class="optionsBar">
     <div>
-    <div class="inputBarDiv">
-        <div class="inputBarDiv1">
-            @Html.Label("L1", "L1")
-            @Html.TextBox("txtL1", "10")
-        </div>
-        <div class="inputBarDiv2">
-            <div>
-                @Html.Label("Theta1Min", "Theta1 Min")
-                @Html.TextBox("txtTheta1Min", "0")
+        <div class="inputBarDiv">
+            <div class="inputBarDiv1">
+                @Html.Label("L1", "L1")
+                @Html.TextBox("txtL1", "10")
             </div>
-            <div>
-                @Html.Label("Theta1Max", "Theta1 Max")
-                @Html.TextBox("txtTheta1Max", "1.5")
+            <div class="inputBarDiv2">
+                <div>
+                    @Html.Label("Theta1Min", "Theta1 Min")
+                    @Html.TextBox("txtTheta1Min", "0")
+                </div>
+                <div>
+                    @Html.Label("Theta1Max", "Theta1 Max")
+                    @Html.TextBox("txtTheta1Max", "1.5")
+                </div>
             </div>
         </div>
-    </div>
         <div class="inputBarDiv">
             <div class="inputBarDiv1">
                 @Html.Label("L2", "L2")
@@ -45,16 +45,24 @@
         @Html.TextBox("txtAgleStep", "0.1")
     </div>
 
+    <div>
+        <button id="drawPoint" title="Draw Point">Draw Test Points</button>
+        <button id="Calculate" title="Draw Point">Calculate Coordinates</button>
+        <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button><br/>
+        <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
+        <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br/>
+        <button class="js-CameraPosition" data-value="up" title="Camera Up"><i class="arrow up"></i></button>
+        <button class="js-CameraPosition" data-value="down" title="Camera Down"><i class="arrow down"></i></button><br/>
+        <button class="js-CameraPosition zoom" data-value="in" title="Camera In"><span class="zoom-inner"></span></button>
+        <button class="js-CameraPosition zoom1" data-value="out" title="Camera Out"><span class="zoom-inner"></span></button>
+    </div>
+    
+    
+</div>
 
-    <button id="drawPoint" title="Draw Point">Draw Test Points</button>
-    <button id="Calculate" title="Draw Point">Calculate Coordinates</button>
-    <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button><br/>
-    <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
-    <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br/>
-    <button class="js-CameraPosition" data-value="up" title="Camera Up"><i class="arrow up"></i></button>
-    <button class="js-CameraPosition" data-value="down" title="Camera Down"><i class="arrow down"></i></button><br/>
-    <button class="js-CameraPosition zoom" data-value="in" title="Camera In"><span class="zoom-inner"></span></button>
-    <button class="js-CameraPosition zoom1" data-value="out" title="Camera Out"><span class="zoom-inner"></span></button>
+<div class="positionsDiv">
+    @Html.Label("EndPositions", "End Postions of the RobotArm:")<br/>
+    <select id="positionsList" multiple size="10"></select>
 </div>
 
 <div id="robotArmGraphic" class="robotArmGraphic"></div>
@@ -82,6 +90,7 @@
 
         $("#Calculate").click(function () {
             RobotArm.ClearScene();
+            $('#positionsList').find('option').remove();
             var l1 = $("#txtL1").val();
             var l2 = $("#txtL2").val();
             var theta1Min = $("#txtTheta1Min").val();
@@ -95,16 +104,16 @@
                 data: { l1: l1, l2: l2, theta1Min: theta1Min, theta1Max: theta1Max, theta2Min: theta2Min, theta2Max: theta2Max, agleStep: agleStep },
                 dataType: "json",
                 success: function (data) {
-                    debugger;
                     console.log(data);
                     if (data.Success == "false") {
                         alert(data.Message);
                         return;
                     }
-                    data.Positions.map(point => {
+                    data.Positions.map((point, index) => {
                         var x = point.X;
                         var y = point.Y;
                         var z = point.Z;
+                        $("#positionsList").append(`<option value=${index} data-value='{"x": ${x}, "y": ${y}, "z": ${z}}'>(${x}, ${y}, 0)</option>`);
                         RobotArm.DrawPoint(x, y, z);
                     });
                     RobotArm.RenderScene();
@@ -117,11 +126,11 @@
         });
 
         $("#drawRobotArm").click(() => {
-            var endPoint = {
-                x: 5.3524493404594757,
-                y: 4.0198682584939531,
-                z: 0
-            };
+            if ($('#positionsList option:selected').length === 0) {
+                alert("No position selected. Select option from the list.");
+                return;
+            }
+            var endPoint = JSON.parse($('#positionsList option:selected').eq(0).attr("data-value"));
             $.ajax({
                 method: "POST",
                 url: '@Url.Action("CalculateJointPostions", "RobotArm")',
@@ -134,6 +143,7 @@
                         return;
                     }
                     const positions = data.Positions;
+                    RobotArm.ClearLatestRobotArmComponents();
                     positions.map((point) => {
                         RobotArm.DrawRobotArm({x: point.X, y: point.Y, z: point.Z }, endPoint);
                     });
@@ -145,6 +155,11 @@
                 }
             });
 
+        });
+
+        $("#positionsList").change(() => {
+            var position = JSON.parse($('#positionsList option:selected').eq(0).attr("data-value"));
+            RobotArm.HighlightPosition(position.x, position.y, position.z);
         });
 
     }); // End document ready

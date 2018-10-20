@@ -160,26 +160,28 @@ namespace RobotArm
             var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
             var A = 2.0 * c * y;
             var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-            var D = Math.Sqrt(m - n * o);
-            var y1 = (A + D) / B;
-            var y2 = (A - D) / B;
+            var d = m - n * o;
+            // *** Error allowed of 10^-7 if d is negative
+            if (d < 0) {
+                if (d * Math.Pow(10, 7) < 0) d = 0;
+                else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
+            }
+            d = Math.Sqrt(d);
+            var y1 = (A + d) / B;
+            var y2 = (A - d) / B;
             var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
             var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
 
-            return new [] { new Point { X= x1, Y= y1, Z=0 }, new Point { X= x2, Y= y2, Z=0 } };
+            return new List<Point> { new Point { X = x1, Y = y1, Z = 0 }, new Point { X = x2, Y = y2, Z = 0 } }
+                    .Distinct().Where(point=> ValidJointPointWithEndAndZeroPoint(point, endPoint)).ToList();
         }
-    }
 
-    public struct Point
-    {
-        public double X;
-        public double Y;
-        public double Z;
-
-        public double DistanceFromOtherPoint(Point point)
+        private bool ValidJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
         {
-            return Math.Sqrt(Math.Pow(point.Y - Y, 2) + Math.Pow(point.X - X, 2) + Math.Pow(point.Z - Z, 2));
+            var zeroPoint = new Point {X = 0, Y = 0, Z = 0};
+            var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
+            var distanceFromEndPoint = jointPoint.DistanceFromOtherPoint(endPoint);
+            return !(Math.Abs(distanceFromZeroPoint - L1) > 0.0000001) && !(Math.Abs(distanceFromEndPoint - L2) > 0.0000001);
         }
-
     }
 }
