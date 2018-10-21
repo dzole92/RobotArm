@@ -140,8 +140,8 @@ namespace RobotArm
             Formulas for calculation:
                 y1 =  (A + D)/B 
                 y2 = (A - D)/B
-                x1 = Sqrt(L1^2 - y1^2)
-                x1 = Sqrt(L1^2 - y2^2)
+                x1 = +-Sqrt(L1^2 - y1^2)
+                x2 = +-Sqrt(L1^2 - y2^2)
                 -----------------------------------------------------------------
                 A = 2*c*y;
                 B = 2*(y^2 + x^2);
@@ -172,7 +172,11 @@ namespace RobotArm
             var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
             var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
 
-            return new List<Point> { new Point { X = x1, Y = y1, Z = 0 }, new Point { X = x2, Y = y2, Z = 0 } }
+            return new List<Point>
+                {
+                    new Point { X = x1, Y = y1, Z = 0 }, new Point { X = x2, Y = y2, Z = 0 },
+                    new Point { X = -x1, Y = y1, Z = 0 }, new Point { X = -x2, Y = y2, Z = 0 }
+                }
                     .Distinct().Where(point=> ValidJointPointWithEndAndZeroPoint(point, endPoint)).ToList();
         }
 
