@@ -177,15 +177,49 @@ namespace RobotArm
                     new Point { X = x1, Y = y1, Z = 0 }, new Point { X = x2, Y = y2, Z = 0 },
                     new Point { X = -x1, Y = y1, Z = 0 }, new Point { X = -x2, Y = y2, Z = 0 }
                 }
-                    .Distinct().Where(point=> ValidJointPointWithEndAndZeroPoint(point, endPoint)).ToList();
+                    .Distinct().AsParallel().Where( point => 
+                    ValidateJointPointWithEndAndZeroPoint(point, endPoint)
+                    && ValidateJointPointAgaintsAngle(point))
+                    .AsSequential().ToList();
         }
 
-        private bool ValidJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
+        private bool ValidateJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
         {
             var zeroPoint = new Point {X = 0, Y = 0, Z = 0};
             var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
             var distanceFromEndPoint = jointPoint.DistanceFromOtherPoint(endPoint);
             return !(Math.Abs(distanceFromZeroPoint - L1) > 0.0000001) && !(Math.Abs(distanceFromEndPoint - L2) > 0.0000001);
         }
+
+        private bool ValidateJointPointAgaintsAngle(Point jointPoint)
+        {
+            if (Theta1Max <= Math.PI/2)
+                return jointPoint.X >= 0 && jointPoint.Y >= 0 
+                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
+            if (Theta1Max <= Math.PI)
+                return jointPoint.Y >= 0 && jointPoint.X <= 0 
+                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
+            if (Theta1Max <= 270*Math.PI/180)
+                return jointPoint.Y <= 0 && jointPoint.X <= 0 
+                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
+            if (Theta1Max <= 360*Math.PI/180)
+                return jointPoint.Y <= 0 && jointPoint.X >= 0 
+                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
+            return false;
+        }
+
+        private static double CalclucateAngle(Point jointPoint)
+        {
+            var zeroPoint = new Point { X = 0, Y = 0, Z = 0 };
+            var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
+            var alfa = Math.Acos(jointPoint.X/distanceFromZeroPoint);
+            alfa = jointPoint.X < 0 && jointPoint.Y < 0 
+                  || jointPoint.X > 0 && jointPoint.Y < 0
+                ? 2 * Math.PI - alfa
+                : alfa;
+            return alfa;
+        }
+
+        
     }
 }

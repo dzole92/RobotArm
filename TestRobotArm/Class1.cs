@@ -119,5 +119,17 @@ namespace TestRobotArm
                 (Math.Abs(points[1].DistanceFromOtherPoint(endPoint) - robotArm.L2) < 0.0000001).ShouldBe(true);
             }
         }
+
+        [TestCase(3,4)]
+        [TestCase(-3,4)]
+        [TestCase(-3,-4)]
+        [TestCase(3,-4)]
+        public void CheckAgleCalculationFromJointPoint(double x, double y)
+        {
+            var jointPoint = new Point {X= x, Y=y, Z=0};
+            var zeroPoint = new Point { X = 0, Y = 0, Z = 0 };
+            var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
+            var alfa = Math.Acos(jointPoint.X / distanceFromZeroPoint);
+        }
     }
 }
