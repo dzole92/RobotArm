@@ -28,3 +28,18 @@ C:\Workspaces\RobotArm\TestRobotArm\bin\Debug\System.Threading.Tasks.Extensions.
 C:\Workspaces\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.csprojResolveAssemblyReference.cache
 C:\Workspaces\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.dll
 C:\Workspaces\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.pdb
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.dll.config
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\TestRobotArm.pdb
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\Castle.Core.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\NSubstitute.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\nunit.framework.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\RobotArm.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\Shouldly.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\System.Threading.Tasks.Extensions.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\RobotArm.pdb
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\nunit.framework.xml
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\bin\Debug\System.Threading.Tasks.Extensions.xml
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.csprojResolveAssemblyReference.cache
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\TestRobotArm\obj\Debug\TestRobotArm.pdb

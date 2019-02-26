@@ -32,6 +32,8 @@ namespace RobotArm
 
         private readonly FuzzyHelper _fuzzyHelper;
 
+		private readonly Point zeroPoint = new Point {X = 0, Y = 0, Z = 0}; 
+
         public double[] X
         {
             get
@@ -179,7 +181,7 @@ namespace RobotArm
                 }
                     .Distinct().AsParallel().Where( point => 
                     ValidateJointPointWithEndAndZeroPoint(point, endPoint)
-                    && ValidateJointPointAgaintsAngle(point))
+                    && ValidateJointPointAgaintsAngle(point, endPoint))
                     .AsSequential().ToList();
         }
 
@@ -191,34 +193,22 @@ namespace RobotArm
             return !(Math.Abs(distanceFromZeroPoint - L1) > 0.0000001) && !(Math.Abs(distanceFromEndPoint - L2) > 0.0000001);
         }
 
-        private bool ValidateJointPointAgaintsAngle(Point jointPoint)
-        {
-            if (Theta1Max <= Math.PI/2)
-                return jointPoint.X >= 0 && jointPoint.Y >= 0 
-                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
-            if (Theta1Max <= Math.PI)
-                return jointPoint.Y >= 0 && jointPoint.X <= 0 
-                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
-            if (Theta1Max <= 270*Math.PI/180)
-                return jointPoint.Y <= 0 && jointPoint.X <= 0 
-                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
-            if (Theta1Max <= 360*Math.PI/180)
-                return jointPoint.Y <= 0 && jointPoint.X >= 0 
-                    && CalclucateAngle(jointPoint).Between(Theta1Min, Theta1Max, true);
-            return false;
-        }
+        private bool ValidateJointPointAgaintsAngle(Point jointPoint, Point endpoint) {
 
-        private static double CalclucateAngle(Point jointPoint)
-        {
-            var zeroPoint = new Point { X = 0, Y = 0, Z = 0 };
-            var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
-            var alfa = Math.Acos(jointPoint.X/distanceFromZeroPoint);
-            alfa = jointPoint.X < 0 && jointPoint.Y < 0 
-                  || jointPoint.X > 0 && jointPoint.Y < 0
-                ? 2 * Math.PI - alfa
-                : alfa;
-            return alfa;
-        }
+			var slope1 = CalculateSlopeOfLine(zeroPoint, jointPoint);
+			var slope2 = CalculateSlopeOfLine(jointPoint, endpoint);
+
+			var theta1 = Math.Round(Math.Atan(slope1), 7);
+			var theta2 = Math.Round(Math.Atan((slope2 + slope1 * -1) / (1 + slope1 * slope2)), 7);
+
+			if (jointPoint.X < 0 && jointPoint.Y > 0) theta1 = Math.PI + theta1;
+            else if (jointPoint.X > 0 && jointPoint.Y < 0) theta1 = 2*Math.PI + theta1;
+
+			return theta1.Between(Theta1Min, Theta1Max, true); //&& theta2.Between(Theta2Min, Theta2Max, true);
+		}
+
+
+		private double CalculateSlopeOfLine(Point firstPoint, Point secondPoint) { return (secondPoint.Y + firstPoint.Y * -1) / (secondPoint.X + firstPoint.X * -1); }
 
         
     }

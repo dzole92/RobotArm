@@ -8,3 +8,8 @@ C:\Workspaces\RobotArm\RobotArm\bin\Debug\RobotArm.pdb
 C:\Workspaces\RobotArm\RobotArm\obj\Debug\RobotArm.csprojResolveAssemblyReference.cache
 C:\Workspaces\RobotArm\RobotArm\obj\Debug\RobotArm.dll
 C:\Workspaces\RobotArm\RobotArm\obj\Debug\RobotArm.pdb
+C:\Workspaces\DZOLE Workspace\RobotArm\RobotArm\bin\Debug\RobotArm.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\RobotArm\bin\Debug\RobotArm.pdb
+C:\Workspaces\DZOLE Workspace\RobotArm\RobotArm\obj\Debug\RobotArm.csprojResolveAssemblyReference.cache
+C:\Workspaces\DZOLE Workspace\RobotArm\RobotArm\obj\Debug\RobotArm.dll
+C:\Workspaces\DZOLE Workspace\RobotArm\RobotArm\obj\Debug\RobotArm.pdb
