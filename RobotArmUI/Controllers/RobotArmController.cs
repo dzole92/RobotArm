@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using RobotArm;
+using RobotArm.Interfaces;
 
 namespace RobotArmUI.Controllers
 {

@@ -30,6 +30,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="nunit.framework, Version=3.7.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.7.0\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,11 +45,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FuzzyHelper.cs" />
-    <Compile Include="Helper.cs" />
-    <Compile Include="Point.cs" />
+    <Compile Include="ANFIS.cs" />
+    <Compile Include="Factories\ANFISBuilder.cs" />
+    <Compile Include="Factories\RuleSetFactory.cs" />
+    <Compile Include="Helpers\FuzzyHelper.cs" />
+    <Compile Include="Helpers\Helper.cs" />
+    <Compile Include="Helpers\math.cs" />
+    <Compile Include="Interfaces\IRule.cs" />
+    <Compile Include="Interfaces\IRuleExtractor.cs" />
+    <Compile Include="Interfaces\ITraining.cs" />
+    <Compile Include="Interfaces\IRobotArm.cs" />
+    <Compile Include="Interfaces\Point.cs" />
+    <Compile Include="MembershipRules\BellShapedRule.cs" />
+    <Compile Include="MembershipRules\GaussianRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RobotArm.cs" />
+    <Compile Include="RuleExtractors\kmeans.cs" />
+    <Compile Include="RuleExtractors\KMEANSExtractorIO.cs" />
+    <Compile Include="Training\Backprop.cs" />
+    <Compile Include="Training\QProp.cs" />
+    <Compile Include="Training\StochasticQProp.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

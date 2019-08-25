@@ -1,2 +1,7 @@
-C:\Workspaces\RobotArm\RobotArmUI\bin
-RobotArmUI/obj/*
+bin/Debug/*
+/.vs
+/RobotArm/bin/Debug
+obj
+/RobotArmUI/bin
+/RobotArmUI/obj
+bin

@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RobotArm.Helpers;
+using RobotArm.Interfaces;
 
 namespace RobotArm
 {
-    public class RobotArm
-    {
+    public class RobotArm : IRobotArm {
         private double[] x1d;
         private double[] y1d;
         public double L1 { get; }
@@ -24,7 +25,7 @@ namespace RobotArm
 
         public double[] Theta1Vector { get; private set; }
         public double[] Theta2Vector { get; private set; }
-        private IEnumerable<double[,]> AnglesGrid { get; set; }
+        public IEnumerable<double[,]> AnglesGrid { get; set; }
 
         private double[,] Y2D { get; set; }
 

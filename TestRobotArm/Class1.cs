@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using RobotArm;
+using RobotArm.Helpers;
+using RobotArm.Interfaces;
 using Shouldly;
 using RobotArm1 = RobotArm.RobotArm;
 
@@ -51,12 +53,20 @@ namespace TestRobotArm
             double agleStep = 0.1;
             var result = await robotArm.CalculateWholeDataSet(agleStep);
             var result1 = "";
+			var input = "";
+			var outputTheta1 = "";
             for (int i = 0; i < robotArm.X.Length; i++)
             {
                 result1 += $"({robotArm.X[i]},{robotArm.Y[i]})";
-            }
+				input += $"new []{{{robotArm.X[i]}, {robotArm.Y[i]}}},{Environment.NewLine}";
+			}
 
-            Trace.WriteLine(string.Join("; ", robotArm.Theta1Vector));
+			outputTheta1 = robotArm.AnglesGrid.First().ConvertToSingleArray().Aggregate("", (s, d) => s + $"new double[]{{{d}}}, {Environment.NewLine}"); 
+
+			input.ShouldNotBeNullOrEmpty();
+			outputTheta1.ShouldNotBeNullOrEmpty();
+
+			Trace.WriteLine(string.Join("; ", robotArm.Theta1Vector));
             result.ShouldBe(true);
         }
 
