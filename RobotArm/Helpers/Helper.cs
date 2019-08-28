@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using RobotArm.Interfaces;
 
 namespace RobotArm.Helpers
 {
@@ -22,6 +25,19 @@ namespace RobotArm.Helpers
 			}
 
 			return result;
+		}
+
+		public static double[] CovertToANFISParameter(this Point point) {
+			return new [] {point.X, point.Y};
+		}
+		public static double[][] ConvertToANFISParameter(this IEnumerable<Point> positions) {
+			if (!positions.Any()) throw new ArgumentException("List is empty for positions");
+			return positions.Select(x=> new [] {x.X, x.Y}).ToArray();
+		}
+
+		public static double[][] ConvertToANFISParameter(this double[,] angleMatrix) {
+			if (angleMatrix == null || angleMatrix.GetLength(0)==0 ) throw new ArgumentException("List is empty for positions");
+			return ConvertToSingleArray(angleMatrix).Select(x=> new [] {x}).ToArray();
 		}
     }
 }

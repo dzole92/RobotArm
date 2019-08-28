@@ -51,11 +51,13 @@
     <Compile Include="Helpers\FuzzyHelper.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Helpers\math.cs" />
+    <Compile Include="IKinematicOutcome.cs" />
     <Compile Include="Interfaces\IRule.cs" />
     <Compile Include="Interfaces\IRuleExtractor.cs" />
     <Compile Include="Interfaces\ITraining.cs" />
     <Compile Include="Interfaces\IRobotArm.cs" />
     <Compile Include="Interfaces\Point.cs" />
+    <Compile Include="KinematicOutcome.cs" />
     <Compile Include="MembershipRules\BellShapedRule.cs" />
     <Compile Include="MembershipRules\GaussianRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

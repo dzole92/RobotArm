@@ -4,8 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RobotArm.Factories;
 using RobotArm.Helpers;
 using RobotArm.Interfaces;
+using RobotArm.MembershipRules;
+using RobotArm.RuleExtractors;
+using RobotArm.Training;
 
 namespace RobotArm
 {
@@ -32,10 +36,12 @@ namespace RobotArm
         private double[,] X2D { get; set; }
 
         private readonly FuzzyHelper _fuzzyHelper;
+		private ANFIS Theta1ANFIS;
+		private ANFIS Theta2ANFIS;
 
-		private readonly Point zeroPoint = new Point {X = 0, Y = 0, Z = 0}; 
+		private readonly Point zeroPoint = new Point {X = 0, Y = 0, Z = 0};
 
-        public double[] X
+		public double[] X
         {
             get
             {
@@ -78,8 +84,10 @@ namespace RobotArm
         }
 
         public IEnumerable<Point> Positions { get; private set; }
+		public bool IsDataSetCalculated { get; private set; }
+		public bool IsANFISTrained { get; private set; }
 
-        public RobotArm(double l1, double l2, double theta1Min, double theta1Max, double theta2Min, double theta2Max)
+		public RobotArm(double l1, double l2, double theta1Min, double theta1Max, double theta2Min, double theta2Max)
         {
             L1 = l1;
             L2 = l2;
@@ -126,6 +134,7 @@ namespace RobotArm
 
                 Task.WaitAll(t1, t2);
                 Positions = X.Select((t, i) => new Point{ X = t,  Y = Y[i], Z = 0 }).ToList();
+				IsDataSetCalculated = true;
 
                 return true;
             }
@@ -186,7 +195,42 @@ namespace RobotArm
                     .AsSequential().ToList();
         }
 
-        private bool ValidateJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
+		public Task<bool> TrainANFIS(int ruleNumber, int maxIterations) { 
+			return Task.Run(() => {
+				if (!IsDataSetCalculated) throw new ApplicationException("DataSet is not calculated or provided.");
+
+				var sampleSize = Positions.Count() - 1;
+				
+				var theta1ANFIS = Task.Run(() => {
+					var sPropTheta1 = new StochasticQprop(sampleSize);
+					var extractorForTheta1 = new KMEANSExtractorIO(ruleNumber);
+					Theta1ANFIS = ANFISBuilder<GaussianRule>.Build(Positions.ConvertToANFISParameter(),
+																	AnglesGrid.First().ConvertToANFISParameter(), extractorForTheta1, sPropTheta1, maxIterations);
+				});
+				var theta2ANFIS = Task.Run(() => {
+					var sPropTheta2 = new StochasticQprop(sampleSize);
+					var extractorForTheta2 = new KMEANSExtractorIO(ruleNumber);
+					Theta2ANFIS = ANFISBuilder<GaussianRule>.Build(Positions.ConvertToANFISParameter(),
+																	AnglesGrid.Last().ConvertToANFISParameter(), extractorForTheta2, sPropTheta2, maxIterations);
+				});
+
+				Task.WaitAll(theta1ANFIS, theta2ANFIS);
+				IsANFISTrained = true;
+				return true;
+			});
+		}
+
+		public Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint) {
+			if(!IsANFISTrained) throw new ApplicationException("ANFIS is not trained");
+			return Task.Run(() => {
+				var theta1 = Theta1ANFIS?.Inference(endPoint.CovertToANFISParameter()).FirstOrDefault() ?? 0;
+				var theta2 = Theta2ANFIS?.Inference(endPoint.CovertToANFISParameter()).FirstOrDefault() ?? 0;
+
+				return new KinematicOutcome(theta1, theta2, default(Point));
+			});
+		}
+
+		private bool ValidateJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
         {
             var zeroPoint = new Point {X = 0, Y = 0, Z = 0};
             var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);

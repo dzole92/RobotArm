@@ -16,10 +16,14 @@ namespace RobotArm.Interfaces {
 		double[] X { get; }
 		double[] Y { get; }
 		IEnumerable<Point> Positions { get; }
+		bool IsDataSetCalculated { get; }
+		bool IsANFISTrained { get; }
 
 		Task<bool> CalculateWholeDataSet(double agleStep);
 
 		Task<IEnumerable<Point>> CalculateArmJoint(Point endPoint);
+		Task<bool> TrainANFIS(int ruleNumber, int maxIterations);
+		Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint);
 
 	}
 }
