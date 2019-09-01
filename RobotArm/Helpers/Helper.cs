@@ -7,9 +7,10 @@ namespace RobotArm.Helpers
 {
     public static class Helper
     {
-        public static bool Between(this double num, double lower, double upper, bool inclusive = false)
-        {
-            return inclusive
+        public static bool Between(this double num, double lower, double upper, bool inclusive = false) {
+			upper += 0.000001;
+			lower -= 0.000001;
+			return inclusive
                 ? lower <= num && num <= upper
                 : lower < num && num < upper;
         }
