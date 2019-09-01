@@ -4,7 +4,10 @@
 }
 <link href="~/Content/robotArmStyle.css" rel="stylesheet" />
 
-<h2>RobotArm</h2>
+<div>
+    <div class="loader"></div>
+    <div><h2>RobotArm</h2></div>
+</div>
 <div class="optionsBar">
     <div>
         <div class="inputBarDiv">
@@ -45,10 +48,13 @@
         @Html.TextBox("txtAgleStep", "0.1")
     </div>
 
-    <div>
+    <div class="actionBar">
         <button id="drawPoint" title="Draw Point">Draw Test Points</button>
-        <button id="Calculate" title="Draw Point">Calculate Coordinates</button>
-        <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button><br/>
+        <button id="Calculate" title="Draw Point">Generate Coordinates</button>
+        <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button>
+        <button id="trainANFIS" title="Train ANFIS">Train ANFIS</button>
+        <button id="calculateUsingAnfis" title="Calculate Angles using ANFIS">Calculate Angles using ANFIS</button>
+        <br/>
         <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
         <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br/>
         <button class="js-CameraPosition" data-value="up" title="Camera Up"><i class="arrow up"></i></button>
@@ -56,6 +62,7 @@
         <button class="js-CameraPosition zoom" data-value="in" title="Camera In"><span class="zoom-inner"></span></button>
         <button class="js-CameraPosition zoom1" data-value="out" title="Camera Out"><span class="zoom-inner"></span></button>
     </div>
+    
     
     
 </div>
@@ -74,7 +81,18 @@
 <script>
     var RobotArm = window.RobotArm;
     RobotArm.InitializeScene();
-    $(document).ready(function() {
+
+    function hideLoader() {
+        $(".loader").hide();
+    };
+    function showLoader() {
+        $(".loader").show();
+    };
+
+    $(document).ready(function () {
+
+        hideLoader();
+
         $("#drawPoint").click(function() {
             RobotArm.DrawPoint(-10, 5, 0);
             RobotArm.DrawPoint(0, 5, 0);
@@ -160,6 +178,56 @@
         $("#positionsList").change(() => {
             var position = JSON.parse($('#positionsList option:selected').eq(0).attr("data-value"));
             RobotArm.HighlightPosition(position.x, position.y, position.z);
+        });
+
+        $("#trainANFIS").click(() => {
+            showLoader();
+            $.ajax({
+                method: "POST",
+                url: '@Url.Action("TrainANFIS", "RobotArm")',
+                data: { ruleNumber: 25, maxIterations: 150 },
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    if (data.Success == "false") {
+                        alert(data.Message);
+                        return;
+                    }
+
+                    hideLoader();
+                },
+                fail: function (data) {
+                    alert(data);
+                    hideLoader();
+                }
+            });
+        });
+
+        $("#calculateUsingAnfis").click(() => {
+            if ($('#positionsList option:selected').length === 0) {
+                alert("No position selected. Select option from the list.");
+                return;
+            }
+            var endPoint = JSON.parse($('#positionsList option:selected').eq(0).attr("data-value"));
+            $.ajax({
+                method: "POST",
+                url: '@Url.Action("CalculateAngelsUsingANFIS", "RobotArm")',
+                data: { x: endPoint.x, y: endPoint.y },
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    if (data.Success == "false") {
+                        alert(data.Message);
+                        return;
+                    }
+
+
+                },
+                fail: function (data) {
+                    alert(data);
+                }
+            });
+
         });
 
     }); // End document ready

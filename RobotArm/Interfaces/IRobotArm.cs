@@ -21,7 +21,7 @@ namespace RobotArm.Interfaces {
 
 		Task<bool> CalculateWholeDataSet(double agleStep);
 
-		Task<IEnumerable<Point>> CalculateArmJoint(Point endPoint);
+		Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint);
 		Task<bool> TrainANFIS(int ruleNumber, int maxIterations);
 		Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint);
 

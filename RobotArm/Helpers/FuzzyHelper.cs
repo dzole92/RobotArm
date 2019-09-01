@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using RobotArm.Interfaces;
 
 namespace RobotArm.Helpers
 {
@@ -148,6 +149,20 @@ namespace RobotArm.Helpers
             return null;
 
         }
+
+		/// <summary>
+		/// Angle between two crossing vectors.
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <returns></returns>
+		public double AngleBetweenVectors(Point a, Point b) {
+			var multiple = a.X * b.X + a.Y * b.Y;
+			var magnitudeA = Math.Sqrt(Math.Pow(a.X, 2) + Math.Pow(a.Y, 2));
+			var magnitudeB = Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2));
+			var cosAlpha = multiple / (magnitudeA * magnitudeB);
+			return Math.Acos(cosAlpha);
+		}
 
     }
 }

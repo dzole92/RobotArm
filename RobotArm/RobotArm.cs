@@ -146,7 +146,7 @@ namespace RobotArm
         }
 
 
-        public async Task<IEnumerable<Point>> CalculateArmJoint(Point endPoint)
+        public async Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint)
         {
             /* 
             Formulas for calculation:
@@ -184,17 +184,28 @@ namespace RobotArm
             var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
             var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
 
-            return new List<Point>
-                {
-                    new Point { X = x1, Y = y1, Z = 0 }, new Point { X = x2, Y = y2, Z = 0 },
-                    new Point { X = -x1, Y = y1, Z = 0 }, new Point { X = -x2, Y = y2, Z = 0 }
-                }
-                    .Distinct().AsParallel().Where( point => 
-                    ValidateJointPointWithEndAndZeroPoint(point, endPoint)
-                    && ValidateJointPointAgaintsAngle(point, endPoint))
-                    .AsSequential().ToList();
+			var listOfPoints = new List<Point> {
+					new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
+					new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
+				}
+				.Distinct()
+				.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point));
+
+			return
+				listOfPoints.Where(outcome =>
+							outcome.Theta1.Between(Theta1Min, Theta1Max, true) 
+							&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
+							&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
+							).ToList();
+
         }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ruleNumber"></param>
+		/// <param name="maxIterations"></param>
+		/// <returns></returns>
 		public Task<bool> TrainANFIS(int ruleNumber, int maxIterations) { 
 			return Task.Run(() => {
 				if (!IsDataSetCalculated) throw new ApplicationException("DataSet is not calculated or provided.");
@@ -220,25 +231,48 @@ namespace RobotArm
 			});
 		}
 
+		/// <summary>
+		/// Return Theta1 and Theta2 also the joint point.
+		/// </summary>
+		/// <param name="endPoint"></param>
+		/// <returns></returns>
 		public Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint) {
 			if(!IsANFISTrained) throw new ApplicationException("ANFIS is not trained");
 			return Task.Run(() => {
 				var theta1 = Theta1ANFIS?.Inference(endPoint.CovertToANFISParameter()).FirstOrDefault() ?? 0;
 				var theta2 = Theta2ANFIS?.Inference(endPoint.CovertToANFISParameter()).FirstOrDefault() ?? 0;
 
-				return new KinematicOutcome(theta1, theta2, default(Point));
+				var jointPoint = FindJointPointWhenAngleGiven(theta1);
+
+				return new KinematicOutcome(theta1, theta2, jointPoint);
 			});
+		}
+
+		private double FindTheta1WhenJointPointGiven(Point jointPoint) {
+			var vectorX = new Point { X = 100, Y = 0 };
+			return _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+		}
+
+		private double FindTheta2WhenJointPointGiven(Point jointPoint, Point endPoint) {
+			var vectorX = new Point {X = endPoint.X - jointPoint.X, Y = endPoint.Y - jointPoint.Y};
+			return _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+		}
+
+		private Point FindJointPointWhenAngleGiven(double theta1) {
+			if (Math.Abs(L1) < 0.00000001 || Math.Abs(theta1) < 0.00000001) throw new Exception("L1 is not given");
+			var x = Math.Cos(theta1) * L1;
+			var y = Math.Sin(theta1) * L1;
+			return new Point {X = x, Y = y};
 		}
 
 		private bool ValidateJointPointWithEndAndZeroPoint(Point jointPoint, Point endPoint)
         {
-            var zeroPoint = new Point {X = 0, Y = 0, Z = 0};
             var distanceFromZeroPoint = jointPoint.DistanceFromOtherPoint(zeroPoint);
             var distanceFromEndPoint = jointPoint.DistanceFromOtherPoint(endPoint);
             return !(Math.Abs(distanceFromZeroPoint - L1) > 0.0000001) && !(Math.Abs(distanceFromEndPoint - L2) > 0.0000001);
         }
 
-        private bool ValidateJointPointAgaintsAngle(Point jointPoint, Point endpoint) {
+        private bool ValidateJointPointAgainstAngle(Point jointPoint, Point endpoint) {
 
 			var slope1 = CalculateSlopeOfLine(zeroPoint, jointPoint);
 			var slope2 = CalculateSlopeOfLine(jointPoint, endpoint);

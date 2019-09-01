@@ -58,9 +58,9 @@ namespace RobotArmUI.Controllers
             try
             {
                 if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
-                var result = await _robotArm.CalculateArmJoint(new Point() { X = x, Y = y, Z = 0 });
-                if( result.Any(point=> double.IsNaN(point.X) || double.IsNaN(point.Y))) throw new Exception("Some of the coordinates is NaN.");
-                return Json(new { Success = result.Any(), Positions = result.ToList() });
+                var result = await _robotArm.CalculateArmJoint(new Point { X = x, Y = y, Z = 0 });
+                if( result.Any(point=> double.IsNaN(point.JointPosition.X) || double.IsNaN(point.JointPosition.Y))) throw new Exception("Some of the coordinates is NaN.");
+                return Json(new { Success = result.Any(), Positions = result.Select(t=> t.JointPosition).ToList() });
             }
             catch (Exception e)
             {
@@ -70,6 +70,43 @@ namespace RobotArmUI.Controllers
             }
 
         }
+
+		/// <summary>
+		/// Calculate Arm Angels for given end position using trained ANFIS.
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <returns></returns>
+		public async Task<JsonResult> CalculateAngelsUsingANFIS(double x, double y) {
+			try {
+				if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var result = await _robotArm.CalculateAngelsUsingANFIS(new Point() { X = x, Y = y, Z = 0 });
+				if (double.IsNaN(result.Theta1) || double.IsNaN(result.Theta2) ) throw new Exception("Some of the coordinates is NaN.");
+				return Json(new { Success = true, Outcome = result });
+			} catch (Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+
+			}
+		}
+
+		/// <summary>
+		/// Train ANFIS networks after generating train data
+		/// </summary>
+		/// <param name="ruleNumber">Number of Rules using in the training</param>
+		/// <param name="maxIterations">Number of iterations using in the training</param>
+		/// <returns></returns>
+		public async Task<JsonResult> TrainANFIS(int ruleNumber = 25, int maxIterations = 150) {
+			try {
+				if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var result = await _robotArm.TrainANFIS(ruleNumber, maxIterations);
+				return Json(new { Success = result });
+			} catch (Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+
+			}
+		}
 
     }
 }
