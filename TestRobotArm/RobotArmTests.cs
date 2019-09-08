@@ -125,7 +125,7 @@ namespace TestRobotArm
 
             res.ShouldNotBeNull();
             res.Count().ShouldBe(expectingPositions);
-            var points = res.ToArray();
+            var points = res.Select(te => te.JointPosition).ToArray();
             points[0].X.ShouldBeGreaterThan(0);
             points[0].Y.ShouldBeGreaterThan(0);
             points[0].Z.ShouldBe(0);
@@ -183,6 +183,19 @@ namespace TestRobotArm
 			var output1 = await robotArm.CalculateAngelsUsingANFIS(point1); // 1.1
 			var output2 = await robotArm.CalculateAngelsUsingANFIS(point2); // 0.6
 			var output3 = await robotArm.CalculateAngelsUsingANFIS(point3); // 1.4
+		}
+
+		[TestCase]
+		public async Task CalculateErrorBetweenANFIS_and_Mathematical() {
+
+			IRobotArm robotArm = new RobotArm1(10, 7, 0, 1.57, 0, 3.1);
+			robotArm.IsDataSetCalculated.ShouldBeFalse();
+			await robotArm.CalculateWholeDataSet(0.1);
+			await robotArm.TrainANFIS(25, 150);
+			robotArm.IsDataSetCalculated.ShouldBeTrue();
+
+			var result = await robotArm.CalculateMathError();
+			result.ShouldNotBeNull();
 		}
 
 	}

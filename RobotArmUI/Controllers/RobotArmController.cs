@@ -60,7 +60,7 @@ namespace RobotArmUI.Controllers
                 if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
                 var result = await _robotArm.CalculateArmJoint(new Point { X = x, Y = y, Z = 0 });
                 if( result.Any(point=> double.IsNaN(point.JointPosition.X) || double.IsNaN(point.JointPosition.Y))) throw new Exception("Some of the coordinates is NaN.");
-                return Json(new { Success = result.Any(), Positions = result.Select(t=> t.JointPosition).ToList() });
+                return Json(new { Success = result.Any(), Outcomes = result.ToList() });
             }
             catch (Exception e)
             {
@@ -68,7 +68,6 @@ namespace RobotArmUI.Controllers
                 return Json(new { Success = false, e.Message});
 
             }
-
         }
 
 		/// <summary>
@@ -107,6 +106,19 @@ namespace RobotArmUI.Controllers
 
 			}
 		}
+
+		public async Task<JsonResult> CalculateError() {
+			try {
+				if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var results = await _robotArm.CalculateMathError();
+				return Json(new {Success = true, Outcome = results});
+			} catch (Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+			}
+		}
+
+		
 
     }
 }

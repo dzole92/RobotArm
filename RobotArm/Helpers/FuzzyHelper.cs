@@ -127,14 +127,14 @@ namespace RobotArm.Helpers
             return null;
         }
 
-        public async Task<double[]> CalculateVector(double minAgle, double maxAgle, double step)
+        public async Task<double[]> CalculateVector(double minAngle, double maxnAgle, double step)
         {
             try
             {
                 await Task.Yield();
-                if (minAgle > maxAgle) throw new ArgumentException("MinAgle is greater than MaxAgle");
-                Trace.WriteLine($"Calculate vector for: 0:{step}:{maxAgle}. {DateTime.UtcNow:HH:mm:ss ffff}");
-                var vectorLength = (int)((maxAgle-minAgle) / step);
+                if (minAngle > maxnAgle) throw new ArgumentException("MinAgle is greater than MaxAgle");
+                Trace.WriteLine($"Calculate vector for: 0:{step}:{maxnAgle}. {DateTime.UtcNow:HH:mm:ss ffff}");
+                var vectorLength = (int)((maxnAgle-minAngle) / step);
                 var vector = new double[vectorLength + 1];
                 for (var i = 0; i <= vectorLength; i++)
                 {
@@ -161,8 +161,32 @@ namespace RobotArm.Helpers
 			var magnitudeA = Math.Sqrt(Math.Pow(a.X, 2) + Math.Pow(a.Y, 2));
 			var magnitudeB = Math.Sqrt(Math.Pow(b.X, 2) + Math.Pow(b.Y, 2));
 			var cosAlpha = multiple / (magnitudeA * magnitudeB);
+			cosAlpha = cosAlpha > 1 ? 1 : cosAlpha;
+			cosAlpha = cosAlpha < -1 ? -1 : cosAlpha;
 			return Math.Acos(cosAlpha);
 		}
 
-    }
+
+		public Task<IEnumerable<MathErrorOutcome>> CalculateMathError(IEnumerable<IKinematicOutcome> mathematical, IEnumerable<IKinematicOutcome> anfis) {
+			var expectedOutcomes = mathematical?.Where(x=> x != null).ToArray();
+			var actualOutcomes = anfis?.Where(x => x != null).ToArray();
+			if (expectedOutcomes == null || actualOutcomes == null || expectedOutcomes.Length != actualOutcomes.Length) throw new ArgumentException("Size of mathematical and anfis does not match.");
+			return Task.Run(() => {
+				return expectedOutcomes.Select((t, i) => CalculateMathError(t, actualOutcomes[i])).Where(x => x != null);
+			});
+		}
+
+		public MathErrorOutcome CalculateMathError(IKinematicOutcome mathematical, IKinematicOutcome anfis) {
+			if (double.IsNaN(mathematical.Theta1)
+			|| double.IsNaN(mathematical.Theta2)
+			|| double.IsNaN(anfis.Theta1)
+			|| double.IsNaN(anfis.Theta2)) throw new Exception("Some angle is NaN");
+			var result = new MathErrorOutcome {
+				Theta1Error = (mathematical.Theta1 - anfis.Theta1), 
+				Theta2Error = (mathematical.Theta2 - anfis.Theta2)
+			};
+			return result;
+		}
+
+	}
 }

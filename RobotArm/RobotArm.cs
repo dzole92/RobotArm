@@ -146,7 +146,7 @@ namespace RobotArm
         }
 
 
-        public async Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint)
+        public Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint)
         {
             /* 
             Formulas for calculation:
@@ -163,40 +163,75 @@ namespace RobotArm
                 n = 4*(y^2+x^2);
                 o = (c^2-(x^2*L1^2));
            */
-            await Task.Yield();
-            var x = endPoint.X;
-            var y = endPoint.Y;
-            var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
-            var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
-            var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-            var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
-            var A = 2.0 * c * y;
-            var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-            var d = m - n * o;
-            // *** Error allowed of 10^-7 if d is negative
-            if (d < 0) {
-                if (d * Math.Pow(10, 7) < 0) d = 0;
-                else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
-            }
-            d = Math.Sqrt(d);
-            var y1 = (A + d) / B;
-            var y2 = (A - d) / B;
-            var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
-            var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
+			return Task.Run(() => {
+				var x = endPoint.X;
+				var y = endPoint.Y;
+				var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
+				var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
+				var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+				var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
+				var A = 2.0 * c * y;
+				var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+				var d = m - n * o;
+				// *** Error allowed of 10^-7 if d is negative
+				if (d < 0) {
+					if (d * Math.Pow(10, 7) < 0) d = 0;
+					else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
+				}
+				d = Math.Sqrt(d);
+				var y1 = (A + d) / B;
+				var y2 = (A - d) / B;
+				var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
+				var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
 
-			var listOfPoints = new List<Point> {
+				var listOfPoints = new List<Point> {
 					new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
 					new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
-				}
-				.Distinct()
-				.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point));
+				}.Distinct(new CustomPointEquality());
 
-			return
-				listOfPoints.Where(outcome =>
-							outcome.Theta1.Between(Theta1Min, Theta1Max, true) 
-							&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
-							&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
-							).ToList();
+				//var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
+				return
+					listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
+						.Where(outcome =>
+									outcome.Theta1.Between(Theta1Min, Theta1Max, true)
+								&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
+								&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
+							);
+			});
+   //         await Task.Yield();
+   //         var x = endPoint.X;
+   //         var y = endPoint.Y;
+   //         var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
+   //         var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
+   //         var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+   //         var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
+   //         var A = 2.0 * c * y;
+   //         var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+   //         var d = m - n * o;
+   //         // *** Error allowed of 10^-7 if d is negative
+   //         if (d < 0) {
+   //             if (d * Math.Pow(10, 7) < 0) d = 0;
+   //             else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
+   //         }
+   //         d = Math.Sqrt(d);
+   //         var y1 = (A + d) / B;
+   //         var y2 = (A - d) / B;
+   //         var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
+   //         var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
+
+			//var listOfPoints = new List<Point> {
+			//		new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
+			//		new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
+			//	}.Distinct(new CustomPointEquality());
+				
+			////var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
+			//return
+			//	listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
+			//		.Where(outcome =>
+			//				outcome.Theta1.Between(Theta1Min, Theta1Max, true) 
+			//				&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
+			//				&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
+			//				).ToList();
 
         }
 
@@ -248,6 +283,28 @@ namespace RobotArm
 			});
 		}
 
+		/// <summary>
+		/// Calculate the error of ANFIS against the mathematical solution
+		/// </summary>
+		/// <returns></returns>
+		public async Task<IEnumerable<MathErrorOutcome>> CalculateMathError() {
+			if(!IsDataSetCalculated) throw new ApplicationException("DataSet is not calculated");
+			if(!IsANFISTrained) throw new ApplicationException("ANFIS is not trained");
+			var mathematicalOutcomes = new List<IKinematicOutcome>();
+			var anfisOutcomes = new List<IKinematicOutcome>();
+			Positions.ToList().ForEach((endPoint) => {
+				var anfisOut = CalculateAngelsUsingANFIS(endPoint).GetAwaiter().GetResult();
+				var mathOuts = CalculateArmJoint(endPoint).GetAwaiter().GetResult();
+				var mathOut = mathOuts.OrderBy(x => x, new CustomSort(anfisOut)).FirstOrDefault();
+				
+				anfisOutcomes.Add(anfisOut);
+				mathematicalOutcomes.Add(mathOut);
+			});
+
+			return await _fuzzyHelper.CalculateMathError(mathematicalOutcomes, anfisOutcomes);
+		}
+
+
 		private double FindTheta1WhenJointPointGiven(Point jointPoint) {
 			var vectorX = new Point { X = 100, Y = 0 };
 			return _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
@@ -291,4 +348,33 @@ namespace RobotArm
 
         
     }
+
+	internal class CustomSort : IComparer<KinematicOutcome> {
+
+		private readonly KinematicOutcome anfis;
+
+		public CustomSort(KinematicOutcome anfis) { this.anfis = anfis; }
+
+		public int Compare(KinematicOutcome x, KinematicOutcome y) {
+			if (x == null) return -1;
+			if (y == null) return 1;
+			var error1 = Math.Abs(x.Theta1 - anfis.Theta1);
+			var error2 = Math.Abs(x.Theta2 - anfis.Theta2);
+			var error11 = Math.Abs(y.Theta1 - anfis.Theta1);
+			var error22 = Math.Abs(y.Theta2 - anfis.Theta2);
+			var sum1 = error1 + error2;
+			var sum2 = error11 + error22;
+			return sum1 > sum2 ? 1 : sum1 < sum2 ?  -1 : 0;
+		}
+
+	}
+
+	internal class CustomPointEquality : IEqualityComparer<Point> {
+
+		private const double TOLERANCE = 0.00001;
+		public bool Equals(Point x, Point y) { return Math.Abs(x.X - y.X) < TOLERANCE && Math.Abs(x.Y - y.Y) < TOLERANCE; }
+
+		public int GetHashCode(Point obj) { return obj.GetHashCode(); }
+
+	}
 }

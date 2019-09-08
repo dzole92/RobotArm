@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RobotArm.Interfaces;
 
 namespace RobotArm {
-	interface IKinematicOutcome {
+	public interface IKinematicOutcome {
 
 		double Theta1 { get; }
 		double Theta2 { get; }

@@ -24,6 +24,7 @@ namespace RobotArm.Interfaces {
 		Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint);
 		Task<bool> TrainANFIS(int ruleNumber, int maxIterations);
 		Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint);
+		Task<IEnumerable<MathErrorOutcome>> CalculateMathError();
 
 	}
 }

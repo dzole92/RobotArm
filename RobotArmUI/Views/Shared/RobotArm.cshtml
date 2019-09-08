@@ -5,72 +5,97 @@
 <link href="~/Content/robotArmStyle.css" rel="stylesheet" />
 
 <div>
-    <div class="loader"></div>
-    <div><h2>RobotArm</h2></div>
-</div>
-<div class="optionsBar">
+    <div class="loadingDiv">
+        <div class="loader"></div>
+    </div>
+    
     <div>
-        <div class="inputBarDiv">
-            <div class="inputBarDiv1">
-                @Html.Label("L1", "L1")
-                @Html.TextBox("txtL1", "10")
-            </div>
-            <div class="inputBarDiv2">
-                <div>
-                    @Html.Label("Theta1Min", "Theta1 Min")
-                    @Html.TextBox("txtTheta1Min", "0")
+        <h2>RobotArm</h2></div>
+</div>
+
+<div class="contentParams">
+    <div class="optionsBar">
+        <div>
+            <div class="inputBarDiv">
+                <div class="inputBarDiv1">
+                    @Html.Label("L1", "L1")
+                    @Html.TextBox("txtL1", "10")
                 </div>
-                <div>
-                    @Html.Label("Theta1Max", "Theta1 Max")
-                    @Html.TextBox("txtTheta1Max", "1.5")
+                <div class="inputBarDiv2">
+                    <div>
+                        @Html.Label("Theta1Min", "Theta1 Min")
+                        @Html.TextBox("txtTheta1Min", "0")
+                    </div>
+                    <div>
+                        @Html.Label("Theta1Max", "Theta1 Max")
+                        @Html.TextBox("txtTheta1Max", "1.5")
+                    </div>
+                </div>
+            </div>
+            <div class="inputBarDiv">
+                <div class="inputBarDiv1">
+                    @Html.Label("L2", "L2")
+                    @Html.TextBox("txtL2", "7")
+                </div>
+                <div class="inputBarDiv2">
+                    <div>
+                        @Html.Label("Theta2Min", "Theta2 Min")
+                        @Html.TextBox("txtTheta2Min", "0")
+                    </div>
+                    <div>
+                        @Html.Label("Theta2Max", "Theta2 Max")
+                        @Html.TextBox("txtTheta2Max", "3.1")
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="inputBarDiv">
-            <div class="inputBarDiv1">
-                @Html.Label("L2", "L2")
-                @Html.TextBox("txtL2", "7")
-            </div>
-            <div class="inputBarDiv2">
-                <div>
-                    @Html.Label("Theta2Min", "Theta2 Min")
-                    @Html.TextBox("txtTheta2Min", "0")
-                </div>
-                <div>
-                    @Html.Label("Theta2Max", "Theta2 Max")
-                    @Html.TextBox("txtTheta2Max", "3.1")
-                </div>
-            </div>
+        <div>
+            @Html.Label("AgleStep", "Agle Step")
+            @Html.TextBox("txtAgleStep", "0.1")
+        </div>
+
+        <div class="actionBar">
+            <button id="drawPoint" title="Draw Point">Draw Test Points</button>
+            <button id="Calculate" title="Draw Point">Generate Coordinates</button>
+            <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button>
+            <button id="trainANFIS" title="Train ANFIS">Train ANFIS</button>
+            <button id="calculateUsingAnfis" title="Calculate Angles using ANFIS">Calculate Angles using ANFIS</button>
+            <button id="calculateError" title="Calculate Error between ANFIS and Mathematical">Calculate Error</button>
+            <br />
+            <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
+            <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br />
+            <button class="js-CameraPosition" data-value="up" title="Camera Up"><i class="arrow up"></i></button>
+            <button class="js-CameraPosition" data-value="down" title="Camera Down"><i class="arrow down"></i></button><br />
+            <button class="js-CameraPosition zoom" data-value="in" title="Camera In"><span class="zoom-inner"></span></button>
+            <button class="js-CameraPosition zoom1" data-value="out" title="Camera Out"><span class="zoom-inner"></span></button>
+        </div>
+
+
+
+    </div>
+
+    <div class="outcomeDiv">
+        <div class="positionsDiv">
+            @Html.Label("EndPositions", "End Postions of the RobotArm:")<br />
+            <select id="positionsList" multiple size="10"></select>
+        </div>
+        <div class="positionsDiv analiticalOutcome">
+            @Html.Label("Mathematical", "Mathematical Outcome:")<br />
+            <textarea id="txtMathematicalOutcome" class="outcomeTextArea" readonly="readonly"></textarea>
+        </div>
+        <div class="positionsDiv anfisOutcome">
+            @Html.Label("ANFIS", "ANFIS Outcome:")<br />
+            <textarea id="txtAnfisOutcome" class="outcomeTextArea" readonly="readonly"></textarea>
+        </div>
+        <div class="positionsDiv">
+            @Html.Label("ANFIS Error", "ANFIS Angles Error Outcome (Theta1, Theta2):")<br />
+            <textarea id="txtAnfisErrorOutcome" class="outcomeTextArea" readonly="readonly"></textarea>
         </div>
     </div>
-    <div>
-        @Html.Label("AgleStep", "Agle Step")
-        @Html.TextBox("txtAgleStep", "0.1")
-    </div>
 
-    <div class="actionBar">
-        <button id="drawPoint" title="Draw Point">Draw Test Points</button>
-        <button id="Calculate" title="Draw Point">Generate Coordinates</button>
-        <button id="drawRobotArm" title="Draw Robot Arm">Draw Robot Arm</button>
-        <button id="trainANFIS" title="Train ANFIS">Train ANFIS</button>
-        <button id="calculateUsingAnfis" title="Calculate Angles using ANFIS">Calculate Angles using ANFIS</button>
-        <br/>
-        <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
-        <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br/>
-        <button class="js-CameraPosition" data-value="up" title="Camera Up"><i class="arrow up"></i></button>
-        <button class="js-CameraPosition" data-value="down" title="Camera Down"><i class="arrow down"></i></button><br/>
-        <button class="js-CameraPosition zoom" data-value="in" title="Camera In"><span class="zoom-inner"></span></button>
-        <button class="js-CameraPosition zoom1" data-value="out" title="Camera Out"><span class="zoom-inner"></span></button>
-    </div>
-    
-    
-    
 </div>
 
-<div class="positionsDiv">
-    @Html.Label("EndPositions", "End Postions of the RobotArm:")<br/>
-    <select id="positionsList" multiple size="10"></select>
-</div>
+
 
 <div id="robotArmGraphic" class="robotArmGraphic"></div>
 
@@ -83,11 +108,23 @@
     RobotArm.InitializeScene();
 
     function hideLoader() {
-        $(".loader").hide();
+        $(".loadingDiv").hide();
     };
     function showLoader() {
-        $(".loader").show();
+        $(".loadingDiv").show();
     };
+
+    function parseKinematicResult(kinematicOutcome) {
+        var theta1 = kinematicOutcome.Theta1;
+        var theta2 = kinematicOutcome.Theta2;
+        var jointPosition = kinematicOutcome.JointPosition;
+
+        return `Theta1: ${theta1},\rTheta2: ${theta2},\rJoint Position: (${jointPosition.X}, ${jointPosition.Y})\r`;
+    }
+
+    function parseMathErrorResults(results) {
+       return results.map(x => `(${x.Theta1Error}, ${x.Theta2Error}) \r`);
+    }
 
     $(document).ready(function () {
 
@@ -107,6 +144,7 @@
         });
 
         $("#Calculate").click(function () {
+            showLoader();
             RobotArm.ClearScene();
             $('#positionsList').find('option').remove();
             var l1 = $("#txtL1").val();
@@ -122,8 +160,9 @@
                 data: { l1: l1, l2: l2, theta1Min: theta1Min, theta1Max: theta1Max, theta2Min: theta2Min, theta2Max: theta2Max, agleStep: agleStep },
                 dataType: "json",
                 success: function (data) {
+                    hideLoader();
                     console.log(data);
-                    if (data.Success == "false") {
+                    if (data.Success == false) {
                         alert(data.Message);
                         return;
                     }
@@ -131,13 +170,14 @@
                         var x = point.X;
                         var y = point.Y;
                         var z = point.Z;
-                        $("#positionsList").append(`<option value=${index} data-value='{"x": ${x}, "y": ${y}, "z": ${z}}'>(${x}, ${y}, 0)</option>`);
+                        $("#positionsList").append(`<option value=${index} data-value='{"x": ${x}, "y": ${y}, "z": ${z}}'>(${x}, ${y})</option>`);
                         RobotArm.DrawPoint(x, y, z);
                     });
                     RobotArm.RenderScene();
                 },
                 fail: function(data) {
                     alert(data);
+                    hideLoader();
                 }
 
             });
@@ -156,14 +196,20 @@
                 dataType: "json",
                 success: function (data) {
                     console.log(data);
-                    if (data.Success == "false") {
+                    if (data.Success == false) {
                         alert(data.Message);
                         return;
                     }
-                    const positions = data.Positions;
+                    var box = $("#txtMathematicalOutcome");
+                   box.val("");
                     RobotArm.ClearLatestRobotArmComponents();
-                    positions.map((point) => {
-                        RobotArm.DrawRobotArm({x: point.X, y: point.Y, z: point.Z }, endPoint);
+                    const outcomes = data.Outcomes;
+                    outcomes.map((outcome) => {
+                        var point = outcome.JointPosition;
+                        RobotArm.DrawRobotArm({ x: point.X, y: point.Y, z: point.Z }, endPoint);
+
+                        const newLine = parseKinematicResult(outcome) + "-------------------------------\r";
+                        box.val(box.val() + newLine);
                     });
                     RobotArm.RenderScene();
 
@@ -189,12 +235,14 @@
                 dataType: "json",
                 success: function (data) {
                     console.log(data);
-                    if (data.Success == "false") {
+                    if (data.Success == false) {
                         alert(data.Message);
-                        return;
+                    } else {
+                        alert("ANFIS trained you can use it now.");
                     }
 
                     hideLoader();
+
                 },
                 fail: function (data) {
                     alert(data);
@@ -216,14 +264,37 @@
                 dataType: "json",
                 success: function (data) {
                     console.log(data);
-                    if (data.Success == "false") {
+                    if (data.Success == false) {
                         alert(data.Message);
                         return;
                     }
-
-
+                    $("#txtAnfisOutcome").val(parseKinematicResult(data.Outcome));
                 },
                 fail: function (data) {
+                    alert(data);
+                }
+            });
+
+        });
+
+        $("#calculateError").click(() => {
+            showLoader();
+            $.ajax({
+                method: "POST",
+                url: '@Url.Action("CalculateError", "RobotArm")',
+                dataType: "json",
+                success: function (data) {
+                    $("#txtAnfisErrorOutcome").val("");
+                    hideLoader();
+                    console.log(data);
+                    if (data.Success == false) {
+                        alert(data.Message);
+                        return;
+                    }
+                    $("#txtAnfisErrorOutcome").val(parseMathErrorResults(data.Outcome));
+                },
+                fail: function (data) {
+                    hideLoader();
                     alert(data);
                 }
             });
