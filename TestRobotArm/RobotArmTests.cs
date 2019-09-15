@@ -267,10 +267,10 @@ namespace TestRobotArm
 			var quadrantIII = fuzzyHelper.InWhichQuadrant(jointPosition, thirdQuadrant);
 			var quadrantIV = fuzzyHelper.InWhichQuadrant(jointPosition, fourthQuadrant);
 
-			quadrantI.ShouldBe(Quadrant.I);
-			quadrantII.ShouldBe(Quadrant.II);
-			quadrantIII.ShouldBe(Quadrant.III);
-			quadrantIV.ShouldBe(Quadrant.IV);
+			quadrantI.ShouldBe(Quadrant.IV);
+			quadrantII.ShouldBe(Quadrant.I);
+			quadrantIII.ShouldBe(Quadrant.II);
+			quadrantIV.ShouldBe(Quadrant.III);
 		}
 
 	}
