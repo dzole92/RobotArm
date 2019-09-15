@@ -198,5 +198,80 @@ namespace TestRobotArm
 			result.ShouldNotBeNull();
 		}
 
+		[TestCase]
+		public void CalculateQuadrant() {
+			var firstQuadrant = new Point {X = 3, Y = 9};
+			var secondQuadrant = new Point {X = -3, Y = 9};
+			var thirdQuadrant = new Point {X = -3, Y = -9};
+			var fourthQuadrant = new Point {X = 3, Y = -9};
+			var fuzzyHelper = new FuzzyHelper();
+			var quadrantI = fuzzyHelper.InWhichQuadrant(firstQuadrant);
+			var quadrantII = fuzzyHelper.InWhichQuadrant(secondQuadrant);
+			var quadrantIII = fuzzyHelper.InWhichQuadrant(thirdQuadrant);
+			var quadrantIV = fuzzyHelper.InWhichQuadrant(fourthQuadrant);
+
+			quadrantI.ShouldBe(Quadrant.I);
+			quadrantII.ShouldBe(Quadrant.II);
+			quadrantIII.ShouldBe(Quadrant.III);
+			quadrantIV.ShouldBe(Quadrant.IV);
+		}
+
+		[TestCase(1, TestName = "Joint in I Quadrant")]
+		[TestCase(2, TestName = "Joint in II Quadrant")]
+		[TestCase(3, TestName = "Joint in III Quadrant")]
+		[TestCase(4, TestName = "Joint in IV Quadrant")]
+		public void CalculateQuadrantByVector(int jointLocation) {
+
+			var jointPosition = new Point();
+			var firstQuadrant = new Point { X = 4, Y = 9 };
+			var secondQuadrant = new Point { X = 2, Y = 10 };
+			var thirdQuadrant = new Point { X = 1, Y = 9 };
+			var fourthQuadrant = new Point { X = 4, Y = 6 };
+
+			switch (jointLocation) {
+				case 1:
+					jointPosition = new Point { X = 3, Y = 9 };
+					firstQuadrant = new Point { X = 4, Y = 9 };
+					secondQuadrant = new Point { X = 2, Y = 10 };
+					thirdQuadrant = new Point { X = 1, Y = 9 };
+					fourthQuadrant = new Point { X = 4, Y = 6 };
+					break;
+				case 2:
+					jointPosition = new Point { X = -3, Y = 9 };
+					firstQuadrant = new Point { X = -4, Y = 9 };
+					secondQuadrant = new Point { X = -2, Y = 10 };
+					thirdQuadrant = new Point { X = -1, Y = 9 };
+					fourthQuadrant = new Point { X = -4, Y = 6 };
+					break;
+				case 3:
+					jointPosition = new Point { X = -3, Y = -9 };
+					firstQuadrant = new Point { X = -4, Y = -9 };
+					secondQuadrant = new Point { X = -2, Y = -10 };
+					thirdQuadrant = new Point { X = -1, Y = -9 };
+					fourthQuadrant = new Point { X = -4, Y = -6 };
+					break;
+				case 4:
+					jointPosition = new Point { X = 3, Y = -9 };
+					firstQuadrant = new Point { X = 4, Y = -9 };
+					secondQuadrant = new Point { X = 2, Y = -10 };
+					thirdQuadrant = new Point { X = 1, Y = -9 };
+					fourthQuadrant = new Point { X = 4, Y = -6 };
+					break;
+			}
+
+			
+			
+			var fuzzyHelper = new FuzzyHelper();
+			var quadrantI = fuzzyHelper.InWhichQuadrant(jointPosition, firstQuadrant);
+			var quadrantII = fuzzyHelper.InWhichQuadrant(jointPosition, secondQuadrant);
+			var quadrantIII = fuzzyHelper.InWhichQuadrant(jointPosition, thirdQuadrant);
+			var quadrantIV = fuzzyHelper.InWhichQuadrant(jointPosition, fourthQuadrant);
+
+			quadrantI.ShouldBe(Quadrant.I);
+			quadrantII.ShouldBe(Quadrant.II);
+			quadrantIII.ShouldBe(Quadrant.III);
+			quadrantIV.ShouldBe(Quadrant.IV);
+		}
+
 	}
 }

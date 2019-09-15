@@ -40,6 +40,7 @@ namespace RobotArm
 		private ANFIS Theta2ANFIS;
 
 		private readonly Point zeroPoint = new Point {X = 0, Y = 0, Z = 0};
+		private const double TOLERANCE = 0.0000001;
 
 		public double[] X
         {
@@ -187,7 +188,7 @@ namespace RobotArm
 				var listOfPoints = new List<Point> {
 					new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
 					new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
-				}.Distinct(new CustomPointEquality());
+				}.Select(RoundWithTolerance).Distinct(new CustomPointEquality());
 
 				//var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
 				return
@@ -234,6 +235,15 @@ namespace RobotArm
 			//				).ToList();
 
         }
+
+		private Point RoundWithTolerance(Point point) {
+			return new Point {
+				X = Math.Abs(point.X) < TOLERANCE ? 0 : point.X,
+				Y = Math.Abs(point.Y) < TOLERANCE ? 0 : point.Y,
+				Z = Math.Abs(point.Z) < TOLERANCE ? 0 : point.Z,
+
+			};
+		}
 
 		/// <summary>
 		/// 
@@ -307,12 +317,31 @@ namespace RobotArm
 
 		private double FindTheta1WhenJointPointGiven(Point jointPoint) {
 			var vectorX = new Point { X = 100, Y = 0 };
-			return _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+			var angle = _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+			var quadrant = _fuzzyHelper.InWhichQuadrant(jointPoint);
+			switch (quadrant) {
+				case Quadrant.II: return Math.PI - angle;
+				case Quadrant.III: return Math.PI + angle;
+				case Quadrant.IV: return 2 * Math.PI - angle;
+				case Quadrant.None:
+				case Quadrant.I:
+				default: return angle;
+			}
 		}
 
 		private double FindTheta2WhenJointPointGiven(Point jointPoint, Point endPoint) {
 			var vectorX = new Point {X = endPoint.X - jointPoint.X, Y = endPoint.Y - jointPoint.Y};
-			return _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+			var angle = _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX);
+			if (Math.Abs(angle) < TOLERANCE) return angle;
+			var quadrant = _fuzzyHelper.InWhichQuadrant(jointPoint, endPoint);
+			switch (quadrant) {
+				case Quadrant.II: return Math.PI - angle;
+				case Quadrant.III: return Math.PI + angle;
+				case Quadrant.IV: return 2 * Math.PI - angle;
+				case Quadrant.None:
+				case Quadrant.I:
+				default: return angle;
+			}
 		}
 
 		private Point FindJointPointWhenAngleGiven(double theta1) {

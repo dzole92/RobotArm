@@ -51,6 +51,7 @@
     <Compile Include="Helpers\FuzzyHelper.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Helpers\math.cs" />
+    <Compile Include="Helpers\Quadrant.cs" />
     <Compile Include="MathErrorOutcome.cs" />
     <Compile Include="IKinematicOutcome.cs" />
     <Compile Include="Interfaces\IRule.cs" />
