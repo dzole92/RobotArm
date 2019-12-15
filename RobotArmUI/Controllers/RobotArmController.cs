@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using RobotArm;
+using RobotArm.Helpers;
 using RobotArm.Interfaces;
 
 namespace RobotArmUI.Controllers
@@ -98,7 +99,7 @@ namespace RobotArmUI.Controllers
 		public async Task<JsonResult> TrainANFIS(int ruleNumber = 25, int maxIterations = 150) {
 			try {
 				if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
-				var result = await _robotArm.TrainANFIS(ruleNumber, maxIterations);
+				var result = await _robotArm.TrainANFIS(ruleNumber, maxIterations, true);
 				return Json(new { Success = result });
 			} catch (Exception e) {
 				Console.WriteLine(e);
@@ -117,6 +118,20 @@ namespace RobotArmUI.Controllers
 				return Json(new { Success = false, e.Message });
 			}
 		}
+
+		public async Task<JsonResult> GenerateCircleOfDots(double radius, double step, double shiftX, double shiftY) {
+			try {
+				await Task.Yield();
+				var helper = new FuzzyHelper();
+				var dots = helper.GenerateCircleOfDots(radius, step, shiftX, shiftY);
+				return Json(new { Success = dots.Any(), Outcomes = dots.ToList() });
+			} catch (Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+			}
+		}
+
+
 
 		
 

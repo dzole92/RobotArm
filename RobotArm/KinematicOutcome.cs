@@ -8,6 +8,8 @@ using RobotArm.Interfaces;
 namespace RobotArm {
 	public class KinematicOutcome: IEquatable<KinematicOutcome>, IKinematicOutcome {
 
+		private const double TOLERANCE = 0.00001;
+
 		public double Theta1 { get; }
 		public double Theta2 { get; }
 		public Point JointPosition { get; }
@@ -20,7 +22,7 @@ namespace RobotArm {
 
 		public bool Equals(KinematicOutcome other) {
 			if (other == null) return false;
-			if (Math.Abs(Theta1 - other.Theta1) < 0.00001 && Math.Abs(Theta2 - other.Theta2) < 0.00001) return true;
+			if (Math.Abs(Theta1 - other.Theta1) < TOLERANCE && Math.Abs(Theta2 - other.Theta2) < TOLERANCE) return true;
 			return false;
 		}
 

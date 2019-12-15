@@ -268,6 +268,27 @@ namespace RobotArm.Helpers
 			}
 		}
 
+		/// <summary>
+		/// Generate Circle of Points using radius, Point step and translations
+		/// </summary>
+		/// <param name="radius"></param>
+		/// <param name="step"></param>
+		/// <param name="shiftX"></param>
+		/// <param name="shiftY"></param>
+		/// <returns></returns>
+		public IEnumerable<Point> GenerateCircleOfDots(double radius, double step = 0.1745, double shiftX = 0, double shiftY = 0) {
+			double counter = 0.0;
+			var result = new List<Point>();
+			while(counter < Math.PI*2) {
+				var x = (radius * Math.Cos(counter)) + shiftX;
+				var y = (radius * Math.Sin(counter)) + shiftY;
+				result.Add(new Point() { X = x, Y = y });
+				counter += step;
+			}
+
+			return result;
+		}
+
 		private static Point CalculateNormalVectorPoint(Point normalVectorPoint1, bool increase = true) {
 			return increase
 				? new Point {

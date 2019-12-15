@@ -61,6 +61,7 @@
             <button id="trainANFIS" title="Train ANFIS">Train ANFIS</button>
             <button id="calculateUsingAnfis" title="Calculate Angles using ANFIS">Calculate Angles using ANFIS</button>
             <button id="calculateError" title="Calculate Error between ANFIS and Mathematical">Calculate Error</button>
+            <button id="circleExperiment" title="Calculate Error between ANFIS and Mathematical using Cicrle">Circle Experiment</button>
             <br />
             <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
             <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br />
@@ -299,6 +300,37 @@
                 }
             });
 
+        });
+
+        $("#circleExperiment").click(() => {
+            showLoader();
+            $.ajax({
+                method: "POST",
+                url: '@Url.Action("GenerateCircleOfDots", "RobotArm")',
+                data: { radius: 3, step: 0.1745, shiftX: 0, shiftY: 9},
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    if (data.Success == false) {
+                        alert(data.Message);
+                        hideLoader();
+                        return;
+                    }
+                    data.Outcomes.map((point, index) => {
+                        var x = point.X;
+                        var y = point.Y;
+                        var z = point.Z;
+                        RobotArm.DrawPoint(x, y, z, {type: "experiment"});
+                    });
+                    RobotArm.RenderScene();
+                    hideLoader();
+                },
+                fail: function (data) {
+                    alert(data.Message);
+                    hideLoader();
+                }
+
+            });
         });
 
     }); // End document ready

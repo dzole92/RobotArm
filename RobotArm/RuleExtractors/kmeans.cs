@@ -84,14 +84,14 @@ namespace RobotArm.RuleExtractors {
 			return m;
 		}
 
-		static private double Error(double[][] x, double[][] c, int[] a) {
+		private static double Error(double[][] x, double[][] c, int[] a) {
 			double sum = 0.0;
 			for (int row = 0; row < x.Length; row++)
 				sum += Euclidian2Distance(x[row], c[a[row]]);
 			return sum / x.Length;
 		}
 
-		static private int Assignment(double[][] x, double[][] c, ref int[] a, ref bool[] need_to_update) {
+		private static int Assignment(double[][] x, double[][] c, ref int[] a, ref bool[] need_to_update) {
 			int[] ta = a.ToArray();
 			bool[] tntu = need_to_update.ToArray();
 			int reassigned = 0;
@@ -121,7 +121,7 @@ namespace RobotArm.RuleExtractors {
 			return reassigned;
 		}
 
-		static private double[][] Update(double[][] x, double[][] old_m, int[] a, bool[] need_to_update, int k) {
+		private static double[][] Update(double[][] x, double[][] old_m, int[] a, bool[] need_to_update, int k) {
 			double[][] m = new double[k][];
 			double[] S = new double[k];
 			int vlen = x[0].Length;
@@ -151,7 +151,7 @@ namespace RobotArm.RuleExtractors {
 			return m;
 		}
 
-		static public double[][] ForgyInit(double[][] x, int k) {
+		public static double[][] ForgyInit(double[][] x, int k) {
 			int[] num = new int[x.Length];
 			for (int i = 0; i < x.Length; i++)
 				num[i] = i;
@@ -163,7 +163,7 @@ namespace RobotArm.RuleExtractors {
 			return m;
 		}
 
-		static private double[][] RandomPartion(double[][] x, int k) {
+		private static double[][] RandomPartion(double[][] x, int k) {
 			Random rnd = new Random();
 			int[] a = new int[x.Length];
 			for (int i = 0; i < x.Length; i++)
@@ -173,7 +173,7 @@ namespace RobotArm.RuleExtractors {
 			return m;
 		}
 
-		static private double[][] kmeansppinit(double[][] x, int k) {
+		private static double[][] kmeansppinit(double[][] x, int k) {
 			Random rnd = new Random(Environment.TickCount);
 			List<double[]> m = new List<double[]>();
 			m.AddRange(x.OrderBy(z => rnd.NextDouble()).Take(k * 10));
@@ -181,7 +181,7 @@ namespace RobotArm.RuleExtractors {
 			return kmeansppiniti(m.ToArray(), k);
 		}
 
-		static private double[][] kmeansppiniti(double[][] x, int k) {
+		private static double[][] kmeansppiniti(double[][] x, int k) {
 			Random rnd = new Random(Environment.TickCount);
 			double[] theta = new double[x.Length];
 			List<double[]> m = new List<double[]>();
@@ -204,7 +204,7 @@ namespace RobotArm.RuleExtractors {
 			return m.ToArray();
 		}
 
-		static public double Theta(double[] inp, List<double[]> centers) {
+		public static double Theta(double[] inp, List<double[]> centers) {
 			double minsum = double.MaxValue;
 			int candidat = -1;
 			for (int c = 0; c < centers.Count; c++) {
@@ -222,7 +222,7 @@ namespace RobotArm.RuleExtractors {
 			return minsum;
 		}
 
-		static private int probt(double[] par, Random rnd) {
+		private static int probt(double[] par, Random rnd) {
 			double aver = par.Average();
 			if (rnd.NextDouble() > 0.5)
 				par = par.Select(x => x >= aver ? x : 0).ToArray();
@@ -238,7 +238,7 @@ namespace RobotArm.RuleExtractors {
 			return j;
 		}
 
-		static public double Euclidian2Distance(double[] x, double[] y) {
+		public static double Euclidian2Distance(double[] x, double[] y) {
 			double dist = 0.0;
 			for (int i = 0; i < x.Length; i++) {
 				double tmp = x[i] - y[i];

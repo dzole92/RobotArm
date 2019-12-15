@@ -173,7 +173,7 @@ namespace TestRobotArm
 			IRobotArm robotArm = new RobotArm1(10, 7, 0, 1.57, 0, 3.1);
 			robotArm.IsDataSetCalculated.ShouldBeFalse();
 			await robotArm.CalculateWholeDataSet(0.1);
-			await robotArm.TrainANFIS(25, 150);
+			await robotArm.TrainANFIS(25, 150, false);
 			robotArm.IsDataSetCalculated.ShouldBeTrue();
 
 			var point1 = new Point {X = 1.10413546487088, Y = 2.81104319371924 };
@@ -191,7 +191,7 @@ namespace TestRobotArm
 			IRobotArm robotArm = new RobotArm1(10, 7, 0, 1.57, 0, 3.1);
 			robotArm.IsDataSetCalculated.ShouldBeFalse();
 			await robotArm.CalculateWholeDataSet(0.1);
-			await robotArm.TrainANFIS(25, 150);
+			await robotArm.TrainANFIS(25, 150, false);
 			robotArm.IsDataSetCalculated.ShouldBeTrue();
 
 			var result = await robotArm.CalculateMathError();

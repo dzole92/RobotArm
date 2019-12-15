@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -147,94 +148,61 @@ namespace RobotArm
         }
 
 
-        public Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint)
-        {
-            /* 
-            Formulas for calculation:
-                y1 =  (A + D)/B 
-                y2 = (A - D)/B
-                x1 = +-Sqrt(L1^2 - y1^2)
-                x2 = +-Sqrt(L1^2 - y2^2)
-                -----------------------------------------------------------------
-                A = 2*c*y;
-                B = 2*(y^2 + x^2);
-                D = Sqrt(m - n*o);
-                c = (L1^2 - L2^2 +x^2 +y^2)/2.0;
-                m = 4*c^2*y^2
-                n = 4*(y^2+x^2);
-                o = (c^2-(x^2*L1^2));
-           */
-			return Task.Run(() => {
-				var x = endPoint.X;
-				var y = endPoint.Y;
-				var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
-				var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
-				var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-				var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
-				var A = 2.0 * c * y;
-				var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-				var d = m - n * o;
-				// *** Error allowed of 10^-7 if d is negative
-				if (d < 0) {
-					if (d * Math.Pow(10, 7) < 0) d = 0;
-					else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
-				}
-				d = Math.Sqrt(d);
-				var y1 = (A + d) / B;
-				var y2 = (A - d) / B;
-				var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
-				var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
+	    public Task<IEnumerable<KinematicOutcome>> CalculateArmJoint(Point endPoint)
+	        {
+	            /* 
+	            Formulas for calculation:
+	                y1 =  (A + D)/B 
+	                y2 = (A - D)/B
+	                x1 = +-Sqrt(L1^2 - y1^2)
+	                x2 = +-Sqrt(L1^2 - y2^2)
+	                -----------------------------------------------------------------
+	                A = 2*c*y;
+	                B = 2*(y^2 + x^2);
+	                D = Sqrt(m - n*o);
+	                c = (L1^2 - L2^2 +x^2 +y^2)/2.0;
+	                m = 4*c^2*y^2
+	                n = 4*(y^2+x^2);
+	                o = (c^2-(x^2*L1^2));
+	           */
+				return Task.Run(() => {
+					var x = endPoint.X;
+					var y = endPoint.Y;
+					var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
+					var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
+					var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+					var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
+					var A = 2.0 * c * y;
+					var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
+					var d = m - n * o;
+					// *** Error allowed of 10^-7 if d is negative
+					if (d < 0) {
+						if (d * Math.Pow(10, 7) < 0) d = 0;
+						else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
+					}
+					d = Math.Sqrt(d);
+					var y1 = (A + d) / B;
+					var y2 = (A - d) / B;
+					var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
+					var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
 
-				var listOfPoints = new List<Point> {
-					new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
-					new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
-				}.Select(RoundWithTolerance).Distinct(new CustomPointEquality());
+					var listOfPoints = new List<Point> {
+						new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
+						new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
+					}.Select(RoundWithTolerance).Distinct(new CustomPointEquality());
 
-				//var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
-				return
-					listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
-						.Where(outcome =>
-									outcome.Theta1.Between(Theta1Min, Theta1Max, true)
-								&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
-								&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
-							);
-			});
-   //         await Task.Yield();
-   //         var x = endPoint.X;
-   //         var y = endPoint.Y;
-   //         var c = (Math.Pow(L1, 2) - Math.Pow(L2, 2) + Math.Pow(x, 2) + Math.Pow(y, 2)) / 2.0;
-   //         var m = 4 * (Math.Pow(c, 2) * Math.Pow(y, 2));
-   //         var n = 4 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-   //         var o = Math.Pow(c, 2) - x * x * Math.Pow(L1, 2);
-   //         var A = 2.0 * c * y;
-   //         var B = 2 * (Math.Pow(y, 2) + Math.Pow(x, 2));
-   //         var d = m - n * o;
-   //         // *** Error allowed of 10^-7 if d is negative
-   //         if (d < 0) {
-   //             if (d * Math.Pow(10, 7) < 0) d = 0;
-   //             else throw new Exception($"Cannot calculate joint point for this end point: x: {x} y: {y}");
-   //         }
-   //         d = Math.Sqrt(d);
-   //         var y1 = (A + d) / B;
-   //         var y2 = (A - d) / B;
-   //         var x1 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y1, 2));
-   //         var x2 = Math.Sqrt(Math.Pow(L1, 2) - Math.Pow(y2, 2));
+					//var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
+					return
+						listOfPoints.Select(point => 
+												new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
+												.Where(outcome =>
+														outcome.Theta1.Between(Theta1Min, Theta1Max, true)
+														&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
+														&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
+													);
+				});
 
-			//var listOfPoints = new List<Point> {
-			//		new Point {X = x1, Y = y1, Z = 0}, new Point {X = x2, Y = y2, Z = 0},
-			//		new Point {X = -x1, Y = y1, Z = 0}, new Point {X = -x2, Y = y2, Z = 0}
-			//	}.Distinct(new CustomPointEquality());
-				
-			////var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
-			//return
-			//	listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
-			//		.Where(outcome =>
-			//				outcome.Theta1.Between(Theta1Min, Theta1Max, true) 
-			//				&& outcome.Theta2.Between(Theta2Min, Theta2Max, true)
-			//				&& ValidateJointPointWithEndAndZeroPoint(outcome.JointPosition, endPoint)
-			//				).ToList();
-
-        }
+	        }
 
 		private Point RoundWithTolerance(Point point) {
 			return new Point {
@@ -251,23 +219,28 @@ namespace RobotArm
 		/// <param name="ruleNumber"></param>
 		/// <param name="maxIterations"></param>
 		/// <returns></returns>
-		public Task<bool> TrainANFIS(int ruleNumber, int maxIterations) { 
+		public Task<bool> TrainANFIS(int ruleNumber, int maxIterations, bool useAnalicitalOutcomeForTraining = false) { 
 			return Task.Run(() => {
 				if (!IsDataSetCalculated) throw new ApplicationException("DataSet is not calculated or provided.");
 
 				var sampleSize = Positions.Count() - 1;
-				
+				var dynamicObj = useAnalicitalOutcomeForTraining ? Positions.Select(x => new { Point = x, KinematicOutCome = CalculateArmJoint(x).GetAwaiter().GetResult().FirstOrDefault() }) : null;
+
+				var input = dynamicObj.Select(x => x.Point).ConvertToANFISParameter();
 				var theta1ANFIS = Task.Run(() => {
 					var sPropTheta1 = new StochasticQprop(sampleSize);
 					var extractorForTheta1 = new KMEANSExtractorIO(ruleNumber);
-					Theta1ANFIS = ANFISBuilder<GaussianRule>.Build(Positions.ConvertToANFISParameter(),
-																	AnglesGrid.First().ConvertToANFISParameter(), extractorForTheta1, sPropTheta1, maxIterations);
+					var expectedOutcome = useAnalicitalOutcomeForTraining ? dynamicObj.Select(x => new[] { x.KinematicOutCome.Theta1 }).ToArray() : AnglesGrid.First().ConvertToANFISParameter();
+					Theta1ANFIS = ANFISBuilder<GaussianRule>.Build(input,
+																	expectedOutcome, extractorForTheta1, sPropTheta1, maxIterations);
 				});
 				var theta2ANFIS = Task.Run(() => {
 					var sPropTheta2 = new StochasticQprop(sampleSize);
 					var extractorForTheta2 = new KMEANSExtractorIO(ruleNumber);
-					Theta2ANFIS = ANFISBuilder<GaussianRule>.Build(Positions.ConvertToANFISParameter(),
-																	AnglesGrid.Last().ConvertToANFISParameter(), extractorForTheta2, sPropTheta2, maxIterations);
+					var expectedOutcome = useAnalicitalOutcomeForTraining ? dynamicObj.Select(x => new[] { x.KinematicOutCome.Theta2 }).ToArray() : AnglesGrid.Last().ConvertToANFISParameter();
+
+					Theta2ANFIS = ANFISBuilder<GaussianRule>.Build(input,
+																	expectedOutcome, extractorForTheta2, sPropTheta2, maxIterations);
 				});
 
 				Task.WaitAll(theta1ANFIS, theta2ANFIS);
@@ -407,3 +380,8 @@ namespace RobotArm
 
 	}
 }
+
+
+
+
+

@@ -147,7 +147,7 @@
     function drawPoint(x, y, z, options) {
         options = options !== undefined ? options : {};
         const ballGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-        const ballMaterial = new THREE.MeshPhongMaterial({ color: options.type !== undefined && (options.type === "robotArmComponent" || options.type === "highlightPosition") ? 0xFF0000 : 0x33aaff });
+        const ballMaterial = new THREE.MeshPhongMaterial({ color: options.type !== undefined ? (options.type === "robotArmComponent" || options.type === "highlightPosition") ? 0xFF0000 : options.type === "experiment" ? 0xFFFB00 : 0x33aaff  : 0x33aaff });
         const ball = new THREE.Mesh(ballGeometry, ballMaterial);
         scene.add(ball);
         ball.position.z = z;
