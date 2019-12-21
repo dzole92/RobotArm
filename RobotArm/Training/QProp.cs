@@ -106,7 +106,7 @@ namespace RobotArm.Training {
 				for (int C = 0; C < outputDim; C++)
 					globalError += Math.Abs(o[C] - y[sample][C]);
 			}
-
+			
 			updateLrates(p_accum, z_accum, prev_p_accum, prev_z_accum, lRatesParams, lRatesConseq);
 			prev_p_accum = p_accum;
 			prev_z_accum = z_accum;

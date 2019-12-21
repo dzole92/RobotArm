@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using RobotArm.Experiments;
 
 namespace RobotArm.Interfaces {
 	public interface IRobotArm {
@@ -25,6 +26,6 @@ namespace RobotArm.Interfaces {
 		Task<bool> TrainANFIS(int ruleNumber, int maxIterations, bool useAnalicitalOutcomeForTraining);
 		Task<KinematicOutcome> CalculateAngelsUsingANFIS(Point endPoint);
 		Task<IEnumerable<MathErrorOutcome>> CalculateMathError();
-
+		Task<IEnumerable<MathErrorOutcome>> DoExperiment(IExperiment experiment);
 	}
 }

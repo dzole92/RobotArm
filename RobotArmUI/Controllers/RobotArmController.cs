@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using RobotArm;
+using RobotArm.Experiments;
 using RobotArm.Helpers;
 using RobotArm.Interfaces;
 
@@ -32,7 +33,7 @@ namespace RobotArmUI.Controllers
             await Task.Yield();
             InitLocalRobotArmParameters(l1, l2, theta1Min, theta1Max, theta2Min, theta2Max, agleStep);
             var result = await _robotArm.CalculateWholeDataSet(agleStep);
-            if (!result) return Json(new { Success = false, Message = "Something whent wrong." });
+            if (!result) return Json(new { Success = false, Message = "Something went wrong." });
             return Json(new { Success = true, Message = "OK", _robotArm.Positions });
         }
 
@@ -61,7 +62,7 @@ namespace RobotArmUI.Controllers
                 if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
                 var result = await _robotArm.CalculateArmJoint(new Point { X = x, Y = y, Z = 0 });
                 if( result.Any(point=> double.IsNaN(point.JointPosition.X) || double.IsNaN(point.JointPosition.Y))) throw new Exception("Some of the coordinates is NaN.");
-                return Json(new { Success = result.Any(), Outcomes = result.ToList() });
+                return Json(new { Success = result.Any(), Outcomes = result.Select(p => new KinematicOutcome(p.Theta1.ConvertRadiansToDegrees(), p.Theta2.ConvertRadiansToDegrees(), p.JointPosition)) });
             }
             catch (Exception e)
             {
@@ -82,6 +83,7 @@ namespace RobotArmUI.Controllers
 				if (_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
 				var result = await _robotArm.CalculateAngelsUsingANFIS(new Point() { X = x, Y = y, Z = 0 });
 				if (double.IsNaN(result.Theta1) || double.IsNaN(result.Theta2) ) throw new Exception("Some of the coordinates is NaN.");
+
 				return Json(new { Success = true, Outcome = result });
 			} catch (Exception e) {
 				Console.WriteLine(e);
@@ -119,13 +121,44 @@ namespace RobotArmUI.Controllers
 			}
 		}
 
-		public async Task<JsonResult> GenerateCircleOfDots(double radius, double step, double shiftX, double shiftY) {
+		public async Task<JsonResult> CircleExperiment(double radius, double step, double shiftX, double shiftY) {
 			try {
 				await Task.Yield();
-				var helper = new FuzzyHelper();
-				var dots = helper.GenerateCircleOfDots(radius, step, shiftX, shiftY);
-				return Json(new { Success = dots.Any(), Outcomes = dots.ToList() });
+				if(_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var circleExperiment = new CircleExperiment();
+				circleExperiment.GeneratePositions(radius, step, shiftX, shiftY);
+				var experimentResult = await _robotArm.DoExperiment(circleExperiment);
+				return Json(new { Success = experimentResult.Any(), ExperimentPositions = circleExperiment.ExperimentPositions.ToList(), Outcome = experimentResult.ToList() });
 			} catch (Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+			}
+		}
+
+		public async Task<JsonResult> SquareExperiment(double side, double step, double shiftX, double shiftY) {
+			try {
+				await Task.Yield();
+				if(_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var squareExperiment = new SquareExperiment();
+				squareExperiment.GeneratePositions(side, step, shiftX, shiftY);
+				var experimentResult = await _robotArm.DoExperiment(squareExperiment);
+
+				return Json(new { Success = experimentResult.Any(), ExperimentPositions = squareExperiment.ExperimentPositions.ToList(), Outcome = experimentResult.ToList() });
+			} catch(Exception e) {
+				Console.WriteLine(e);
+				return Json(new { Success = false, e.Message });
+			}
+		}
+
+		public async Task<JsonResult> SinExperiment(double length, double step, double shiftX, double shiftY) {
+			try {
+				await Task.Yield();
+				if(_robotArm == null) throw new NullReferenceException("Robot Arm is not Initialized");
+				var sinExperiment = new SinExperiment();
+				sinExperiment.GeneratePositions(length, step, shiftX, shiftY);
+				var experimentResult = await _robotArm.DoExperiment(sinExperiment);
+				return Json(new { Success = experimentResult.Any(), ExperimentPositions = sinExperiment.ExperimentPositions.ToList(), Outcome = experimentResult.ToList() });
+			} catch(Exception e) {
 				Console.WriteLine(e);
 				return Json(new { Success = false, e.Message });
 			}
@@ -133,7 +166,5 @@ namespace RobotArmUI.Controllers
 
 
 
-		
-
-    }
+	}
 }

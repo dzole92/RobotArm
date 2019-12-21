@@ -46,6 +46,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ANFIS.cs" />
+    <Compile Include="Experiments\CircleExperiment.cs" />
+    <Compile Include="Experiments\Experiment.cs" />
+    <Compile Include="Experiments\IExperiment.cs" />
+    <Compile Include="Experiments\SinExperiment.cs" />
+    <Compile Include="Experiments\SquareExperiment.cs" />
     <Compile Include="Factories\ANFISBuilder.cs" />
     <Compile Include="Factories\RuleSetFactory.cs" />
     <Compile Include="Helpers\FuzzyHelper.cs" />

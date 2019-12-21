@@ -40,5 +40,17 @@ namespace RobotArm.Helpers
 			if (angleMatrix == null || angleMatrix.GetLength(0)==0 ) throw new ArgumentException("List is empty for positions");
 			return ConvertToSingleArray(angleMatrix).Select(x=> new [] {x}).ToArray();
 		}
-    }
+
+		public static double ConvertRadiansToDegrees(this double radiansAngle) {
+			return (180 / Math.PI) * radiansAngle;
+		}
+
+		public static double ConvertDegreesToRadians(this double degreesAngle) {
+			return ( Math.PI / 180) * degreesAngle;
+		}
+
+		public static double Round(this double number, int decimals = 5) {
+			return double.IsNaN(number) ? 0 : Math.Round(number, decimals);
+		}
+	}
 }

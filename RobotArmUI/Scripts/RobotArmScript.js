@@ -8,6 +8,7 @@
     var CANVAS_WIDTH;
     var CANVAS_HEIGHT;
     var latestRobotArmComponents = [];
+    var experimentComponents = [];
     var highlightedPoint;
 
     function initializeScene() {
@@ -161,6 +162,9 @@
         else if (options.type !== undefined && options.type === "highlightPosition") {
             ball.name = "highlightPosition";
             highlightedPoint = ball;
+        } else if (options.type !== undefined && options.type === "experiment") {
+            ball.name = "experiment";
+            experimentComponents.push(ball);
         }
     }
 
@@ -219,6 +223,7 @@
 //        controls.update();
     }
 
+   
     //function onMouseMove(e) {
     //    if (points.length === 0) return;
     //    mouseVector.x = 2 * (e.clientX / window.innerWidth) - 1;
@@ -264,6 +269,16 @@
         renderScene();
     }
 
+    function clearExperiment() {
+        if (experimentComponents.length === 0) return;
+        experimentComponents.map(object => {
+            const selectedObject = scene.getObjectByName(object.name);
+            scene.remove(selectedObject);
+        });
+        experimentComponents = [];
+        renderScene();
+    }
+
     function highlightPosition(x, y, z) {
         if (highlightedPoint !== undefined) {
             const selectedObject = scene.getObjectByName(highlightedPoint.name);
@@ -282,6 +297,7 @@
         ClearScene: clearScene,
         DrawRobotArm: drawRobotArm,
         ClearLatestRobotArmComponents: clearLatestRobotArmComponents,
-        HighlightPosition: highlightPosition
+        HighlightPosition: highlightPosition,
+        ClearExperiment: clearExperiment
     }
 }(document, window, jQuery, window.RobotArm));

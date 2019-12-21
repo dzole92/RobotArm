@@ -50,7 +50,7 @@
             </div>
         </div>
         <div>
-            @Html.Label("AgleStep", "Agle Step")
+            @Html.Label("AngleStep", "Angle Step")
             @Html.TextBox("txtAgleStep", "0.1")
         </div>
 
@@ -61,7 +61,9 @@
             <button id="trainANFIS" title="Train ANFIS">Train ANFIS</button>
             <button id="calculateUsingAnfis" title="Calculate Angles using ANFIS">Calculate Angles using ANFIS</button>
             <button id="calculateError" title="Calculate Error between ANFIS and Mathematical">Calculate Error</button>
-            <button id="circleExperiment" title="Calculate Error between ANFIS and Mathematical using Cicrle">Circle Experiment</button>
+            <button id="circleExperiment" title="Calculate Error between ANFIS and Mathematical using Circle">Circle Experiment</button>
+            <button id="squareExperiment" title="Calculate Error between ANFIS and Mathematical using Square">Square Experiment</button>
+            <button id="sinExperiment" title="Calculate Error between ANFIS and Mathematical using Sin">Sin Experiment</button>
             <br />
             <button class="js-CameraPosition" data-value="left" title="Camera Left"><i class="arrow left"></i></button>
             <button class="js-CameraPosition" data-value="right" title="Camera Right"><i class="arrow right"></i></button><br />
@@ -77,7 +79,7 @@
 
     <div class="outcomeDiv">
         <div class="positionsDiv">
-            @Html.Label("EndPositions", "End Postions of the RobotArm:")<br />
+            @Html.Label("EndPositions", "End Positions of the RobotArm:")<br />
             <select id="positionsList" multiple size="10"></select>
         </div>
         <div class="positionsDiv analiticalOutcome">
@@ -125,6 +127,39 @@
 
     function parseMathErrorResults(results) {
        return results.map(x => `(${x.Theta1Error}, ${x.Theta2Error}) \r`);
+    }
+
+    function doExperiment(endpointUrl, experimentData) {
+        showLoader();
+        RobotArm.ClearExperiment();
+            $.ajax({
+                method: "POST",
+                url: endpointUrl,
+                data: experimentData,
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    if (data.Success == false) {
+                        alert(data.Message);
+                        hideLoader();
+                        return;
+                    }
+                    $("#txtAnfisErrorOutcome").val(parseMathErrorResults(data.Outcome));
+                    data.ExperimentPositions.map((point, index) => {
+                        var x = point.X;
+                        var y = point.Y;
+                        var z = point.Z;
+                        RobotArm.DrawPoint(x, y, z, {type: "experiment"});
+                    });
+                    RobotArm.RenderScene();
+                    hideLoader();
+                },
+                fail: function (data) {
+                    alert(data.Message);
+                    hideLoader();
+                }
+
+            });
     }
 
     $(document).ready(function () {
@@ -303,34 +338,21 @@
         });
 
         $("#circleExperiment").click(() => {
-            showLoader();
-            $.ajax({
-                method: "POST",
-                url: '@Url.Action("GenerateCircleOfDots", "RobotArm")',
-                data: { radius: 3, step: 0.1745, shiftX: 0, shiftY: 9},
-                dataType: "json",
-                success: function (data) {
-                    console.log(data);
-                    if (data.Success == false) {
-                        alert(data.Message);
-                        hideLoader();
-                        return;
-                    }
-                    data.Outcomes.map((point, index) => {
-                        var x = point.X;
-                        var y = point.Y;
-                        var z = point.Z;
-                        RobotArm.DrawPoint(x, y, z, {type: "experiment"});
-                    });
-                    RobotArm.RenderScene();
-                    hideLoader();
-                },
-                fail: function (data) {
-                    alert(data.Message);
-                    hideLoader();
-                }
+            let url = '@Url.Action("CircleExperiment", "RobotArm")';
+            let data = { radius: 3, step: 0.1745, shiftX: -0.5, shiftY: 7 };
+            doExperiment(url, data);
+        });
 
-            });
+        $("#squareExperiment").click(() => {
+            let url = '@Url.Action("SquareExperiment", "RobotArm")';
+            let data = { side: 3, step: 0.2, shiftX: 3, shiftY: 9 };
+            doExperiment(url, data);
+        });
+
+         $("#sinExperiment").click(() => {
+            let url = '@Url.Action("SinExperiment", "RobotArm")';
+            let data = { length: 10, step: 0.3, shiftX: 3, shiftY: 9 };
+            doExperiment(url, data);
         });
 
     }); // End document ready
