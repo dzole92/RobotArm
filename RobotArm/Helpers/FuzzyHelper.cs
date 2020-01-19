@@ -168,7 +168,7 @@ namespace RobotArm.Helpers
 			cosAlpha = cosAlpha > 1 ? 1 : cosAlpha;
 			cosAlpha = cosAlpha < -1 ? -1 : cosAlpha;
 			var result = Math.Acos(cosAlpha);
-			return cosAlpha < 0 ? Math.PI - result : result;
+			return result;
 		}
 
 

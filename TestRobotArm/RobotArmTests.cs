@@ -273,5 +273,52 @@ namespace TestRobotArm
 			quadrantIV.ShouldBe(Quadrant.III);
 		}
 
+		[Test]
+		public void CalculateAngle() {
+			var vectorA = new Point() { X = 100, Y = 0 };
+			var vectorB = new Point() { X = -20, Y = 20 };
+
+			var fuzzyHelper = new FuzzyHelper();
+			var angle = fuzzyHelper.AngleBetweenVectors(vectorA, vectorB).ConvertRadiansToDegrees();
+
+			angle.ShouldBe(135, 0.5);
+
+			vectorA = new Point() { X = 100, Y = 0 };
+			vectorB = new Point() { X = 20, Y = -20 };
+
+			angle = fuzzyHelper.AngleBetweenVectors(vectorA, vectorB);
+			var quadrant = fuzzyHelper.InWhichQuadrant(vectorB);
+			switch(quadrant) {
+				
+				case Quadrant.IV:
+					angle = (2 * Math.PI - angle).Round();break;
+
+				case Quadrant.None:
+				case Quadrant.I:
+				default:
+					break;
+			}
+			angle.ConvertRadiansToDegrees().ShouldBe(315, 0.5);
+
+			vectorA = new Point() { X = 100, Y = 0 };
+			vectorB = new Point() { X = -20, Y = -20 };
+
+			angle = fuzzyHelper.AngleBetweenVectors(vectorA, vectorB);
+
+			quadrant = fuzzyHelper.InWhichQuadrant(vectorB);
+			switch(quadrant) {
+
+				case Quadrant.III:					
+				case Quadrant.IV:
+					angle = (2 * Math.PI - angle).Round();
+					break;
+
+				case Quadrant.None:
+				case Quadrant.I:
+				default:
+					break;
+			}
+			angle.ConvertRadiansToDegrees().ShouldBe(225, 0.5);
+		}
 	}
 }

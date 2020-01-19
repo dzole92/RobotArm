@@ -5,3 +5,5 @@ obj
 /RobotArmUI/bin
 /RobotArmUI/obj
 bin
+NUnit.3.12.0
+packages/*

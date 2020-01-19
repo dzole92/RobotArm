@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RobotArm.Interfaces;
 
 namespace RobotArm.Experiments {
+
 	public class CircleExperiment : Experiment {
 
 		public override IEnumerable<Point> GeneratePositions(double radius, double step = 0.1745, double shiftX = 0, double shiftY = 0) {

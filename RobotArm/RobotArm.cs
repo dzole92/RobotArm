@@ -183,7 +183,7 @@ namespace RobotArm {
 						new Point {X = -x1.Round(), Y = y1.Round(), Z = 0}, new Point {X = -x2.Round(), Y = y2.Round(), Z = 0}
 					}.Select(RoundWithTolerance).Distinct(new CustomPointEquality());
 
-				var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
+				//var t = listOfPoints.Select(point => new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point)).ToList();
 				return
 					listOfPoints.Select(point =>
 											new KinematicOutcome(FindTheta1WhenJointPointGiven(point), FindTheta2WhenJointPointGiven(point, endPoint), point))
@@ -312,12 +312,9 @@ namespace RobotArm {
 			var angle = _fuzzyHelper.AngleBetweenVectors(jointPoint, vectorX).Round();
 			var quadrant = _fuzzyHelper.InWhichQuadrant(jointPoint);
 			switch(quadrant) {
-				case Quadrant.II:
-					return (Math.PI - angle).Round();
-
+				//case Quadrant.II:
+				//	return (Math.PI - angle).Round();
 				case Quadrant.III:
-					return (Math.PI + angle).Round();
-
 				case Quadrant.IV:
 					return (2 * Math.PI - angle).Round();
 
@@ -335,11 +332,11 @@ namespace RobotArm {
 				return angle;
 			var quadrant = _fuzzyHelper.InWhichQuadrant(jointPoint, endPoint);
 			switch(quadrant) {
-				case Quadrant.II:
-					return (Math.PI - angle).Round();
+				//case Quadrant.II:
+					//return (Math.PI - angle).Round();
 
 				case Quadrant.III:
-					return (Math.PI + angle).Round();
+					//return (Math.PI + angle).Round();
 
 				case Quadrant.IV:
 					return (2 * Math.PI - angle).Round();
